@@ -25,13 +25,23 @@
 <body class="bg-light">
 
   <!-- 導覽列 -->
+  <!-- ✅ Navbar 頂部 -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4">
-    <a class="navbar-brand" href="#">韓文學習網</a>
-    <div class="ms-auto">
-      <!-- 預設為匿名訪客，用戶登入後會替換這個 -->
-      <img src="https://via.placeholder.com/40" alt="User Avatar" class="avatar">
+    <a class="navbar-brand" href="index.html">韓文學習網</a>
+
+    <div class="dropdown ms-auto" id="accountDropdown">
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" id="userEmailDisplay">
+        <img src="https://via.placeholder.com/40" class="avatar" alt="User">
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><span class="dropdown-item-text" id="accountEmail">尚未登入</span></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item text-danger" href="#" id="logoutBtn" style="display: none;">登出</a></li>
+        <li><a class="dropdown-item" href="login.html" id="loginLink">登入 / 註冊</a></li>
+      </ul>
     </div>
   </nav>
+
 
   <!-- 主要內容 -->
   <div class="container text-center">
@@ -44,7 +54,7 @@
     </div>
 
     <!-- 註冊區塊（可隱藏，等你後續實作） -->
-    <div class="mt-5">
+    <!-- <div class="mt-5">
       <h5>尚未註冊？立即註冊帳號：</h5>
       <form style="max-width: 400px; margin: 0 auto;">
         <div class="mb-3">
@@ -55,12 +65,123 @@
         </div>
         <button type="submit" class="btn btn-outline-primary">註冊</button>
       </form>
+    </div> -->
+    <!-- 登入與註冊 -->
+    <div class="mt-5 container">
+      <h5 class="text-center">尚未註冊？立即註冊帳號：</h5>
+      <div class="row justify-content-center">
+      <div class="col-md-6">
+
+      <!-- 註冊 -->
+      <div class="border p-4 rounded mb-4 bg-white shadow-sm">
+        <h6>註冊帳號</h6>
+        <div class="mb-3">
+          <input type="email" id="signupEmail" class="form-control" placeholder="Email">
+        </div>
+        <div class="mb-3">
+          <input type="password" id="signupPassword" class="form-control" placeholder="密碼">
+        </div>
+        <button id="signupBtn" class="btn btn-outline-primary w-100">註冊</button>
+      </div>
+
+      <!-- 登入 -->
+      <div class="border p-4 rounded bg-white shadow-sm">
+        <h6>已有帳號？登入</h6>
+        <div class="mb-3">
+          <input type="email" id="loginEmail" class="form-control" placeholder="Email">
+        </div>
+        <div class="mb-3">
+          <input type="password" id="loginPassword" class="form-control" placeholder="密碼">
+        </div>
+        <button id="loginBtn" class="btn btn-outline-success w-100">登入</button>
+      </div>
+
+      <!-- 登入狀態顯示 -->
+      <div id="accountStatus" class="mt-4 text-end text-muted small"></div>
+
     </div>
+  </div>
+</div>
+
+
+    <!-- 帳號狀態顯示區 -->
+    <div id="accountStatus" class="mt-3 text-end"></div>
+
   </div>
 
   <footer class="text-center text-muted mt-5 mb-3">
     <p>&copy; 2025 韓文學習網</p>
   </footer>
 
+  <script type="module">
+    import { auth } from './firebase-init.js';
+    import {
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
+
+    // 🔄 監聽登入狀態改變
+    onAuthStateChanged(auth, (user) => {
+      const accountStatus = document.getElementById("accountStatus");
+      const accountEmail = document.getElementById("accountEmail");
+      const logoutBtn = document.getElementById("logoutBtn");
+      const loginLink = document.getElementById("loginLink");
+      const userEmailDisplay = document.getElementById("userEmailDisplay");
+
+      if (user) {
+        accountStatus.innerHTML = `👤 ${user.email}`;
+        if (accountEmail) accountEmail.textContent = user.email;
+        if (logoutBtn) logoutBtn.style.display = "block";
+        if (loginLink) loginLink.style.display = "none";
+        if (userEmailDisplay) userEmailDisplay.title = user.email;
+      } else {
+        if (accountStatus) accountStatus.textContent = "尚未登入";
+        if (accountEmail) accountEmail.textContent = "尚未登入";
+        if (logoutBtn) logoutBtn.style.display = "none";
+        if (loginLink) loginLink.style.display = "block";
+        if (userEmailDisplay) userEmailDisplay.title = "訪客";
+      }
+    });
+
+    // ✨ 註冊
+    const signupBtn = document.getElementById("signupBtn");
+    if (signupBtn) {
+      signupBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const email = document.getElementById("signupEmail").value;
+        const password = document.getElementById("signupPassword").value;
+
+        createUserWithEmailAndPassword(auth, email, password)
+          .then(userCredential => alert("✅ 註冊成功"))
+          .catch(error => alert("❌ 註冊失敗：" + error.message));
+      });
+    }
+
+    // ✨ 登入
+    const loginBtn = document.getElementById("loginBtn");
+    if (loginBtn) {
+      loginBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const email = document.getElementById("loginEmail").value;
+        const password = document.getElementById("loginPassword").value;
+
+        signInWithEmailAndPassword(auth, email, password)
+          .then(userCredential => alert("✅ 登入成功"))
+          .catch(error => alert("❌ 登入失敗：" + error.message));
+      });
+    }
+
+    // ✨ 登出
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        signOut(auth).then(() => location.reload());
+      });
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
