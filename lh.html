@@ -63,42 +63,51 @@
     </div>
   </div>
   <script type="module">
-    import { auth } from './firebase-init.js';
-    import {
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      signOut,
-      onAuthStateChanged
-    } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
+  import {
+    registerUser,
+    loginUser,
+    logoutUser,
+    observeUser
+  } from './firebase-auth-utils.js';
 
-    onAuthStateChanged(auth, (user) => {
-      const accountStatus = document.getElementById("accountStatus");
-      const accountEmail = document.getElementById("accountEmail");
-      const logoutBtn = document.getElementById("logoutBtn");
-      const loginLink = document.getElementById("loginLink");
-      const userEmailDisplay = document.getElementById("userEmailDisplay");
+  // 註冊按鈕
+  document.getElementById("signupBtn").addEventListener("click", async () => {
+    const email = document.getElementById("signupEmail").value;
+    const password = document.getElementById("signupPassword").value;
 
-      if (user) {
-        accountEmail.textContent = user.email;
-        if (logoutBtn) logoutBtn.style.display = "block";
-        if (loginLink) loginLink.style.display = "none";
-        if (userEmailDisplay) userEmailDisplay.title = user.email;
-      } else {
-        accountEmail.textContent = "尚未登入";
-        if (logoutBtn) logoutBtn.style.display = "none";
-        if (loginLink) loginLink.style.display = "block";
-        if (userEmailDisplay) userEmailDisplay.title = "訪客";
-      }
-    });
-
-    const logoutBtn = document.getElementById("logoutBtn");
-    if (logoutBtn) {
-      logoutBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        signOut(auth).then(() => location.reload());
-      });
+    try {
+      await registerUser(email, password);
+      alert("註冊成功！");
+      window.location.href = "fp.html";
+    } catch (error) {
+      alert("❌ 註冊失敗：" + error.message);
     }
-  </script>
+  });
+
+  // 登入按鈕
+  document.getElementById("loginBtn").addEventListener("click", async () => {
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+
+    try {
+      await loginUser(email, password);
+      alert("登入成功！");
+      window.location.href = "fp.html";
+    } catch (error) {
+      alert("❌ 登入失敗：" + error.message);
+    }
+  });
+
+  // 可加上登出與狀態監聽：
+  observeUser((user) => {
+    if (user) {
+      console.log("已登入", user.email);
+    } else {
+      console.log("尚未登入");
+    }
+  });
+</script>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
