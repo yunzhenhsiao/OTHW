@@ -62,7 +62,43 @@
       <a href="fz.html" class="btn btn-success btn-unit">複合子音</a>
     </div>
   </div>
+  <script type="module">
+    import { auth } from './firebase-init.js';
+    import {
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
 
+    onAuthStateChanged(auth, (user) => {
+      const accountStatus = document.getElementById("accountStatus");
+      const accountEmail = document.getElementById("accountEmail");
+      const logoutBtn = document.getElementById("logoutBtn");
+      const loginLink = document.getElementById("loginLink");
+      const userEmailDisplay = document.getElementById("userEmailDisplay");
+
+      if (user) {
+        accountEmail.textContent = user.email;
+        if (logoutBtn) logoutBtn.style.display = "block";
+        if (loginLink) loginLink.style.display = "none";
+        if (userEmailDisplay) userEmailDisplay.title = user.email;
+      } else {
+        accountEmail.textContent = "尚未登入";
+        if (logoutBtn) logoutBtn.style.display = "none";
+        if (loginLink) loginLink.style.display = "block";
+        if (userEmailDisplay) userEmailDisplay.title = "訪客";
+      }
+    });
+
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        signOut(auth).then(() => location.reload());
+      });
+    }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
