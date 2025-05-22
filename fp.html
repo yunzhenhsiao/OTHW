@@ -86,14 +86,6 @@
         if (userEmailDisplay) userEmailDisplay.title = "訪客";
       }
     });
-
-    const logoutBtn = document.getElementById("logoutBtn");
-    if (logoutBtn) {
-      logoutBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        signOut(auth).then(() => location.reload());
-      });
-    }
   </script>
 
   <!-- Bootstrap JS -->
@@ -106,5 +98,6 @@
       });
     });
   </script>
+  <script type="module" src="./navbar-auth-status.js"></script>
 </body>
 </html>

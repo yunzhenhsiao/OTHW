@@ -11,107 +11,155 @@
     .badge-status {
       font-size: 0.95rem;
     }
+    .card-text-quiz { /* 新增樣式 */
+      font-size: 1rem;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body class="bg-light">
-  <!-- 導覽列 -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4">
     <a class="navbar-brand" href="fp.html">韓文學習網</a>
+    <a class="nav-link" href="lh.html">回單元選擇</a>
+
+    <div class="dropdown ms-auto" id="accountDropdown">
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" id="userEmailDisplay">
+        <img src="https://via.placeholder.com/40" class="avatar" alt="User">
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><span class="dropdown-item-text" id="accountEmail">載入中...</span></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item text-primary" href="account.html">帳號狀態</a></li>
+        <li><a class="dropdown-item text-danger" href="#" id="logoutBtn" style="display: none;">登出</a></li>
+        <li><a class="dropdown-item" href="login.html" id="loginLink">登入 / 註冊</a></li>
+      </ul>
+    </div>
   </nav>
 
   <div class="container py-5">
     <h2 class="text-center mb-4">帳號狀態</h2>
 
-    <!-- 使用者資訊 -->
     <div class="mb-4">
       <h5>登入帳號：<span id="userEmail">載入中...</span></h5>
     </div>
 
-    <!-- 學習進度 -->
     <div class="section-title">
       <h4>📘 學習進度</h4>
       <ul class="list-group" id="progressList">
-        <!-- 動態插入單元進度 -->
-      </ul>
+        </ul>
     </div>
 
-    <!-- 測驗徽章 -->
     <div class="section-title">
-      <h4>🏅 測驗結果徽章</h4>
-      <div id="badgeGrid" class="row g-3">
-        <!-- 動態插入徽章卡片 -->
-      </div>
+      <h4>🏆 測驗進度</h4>
+      <div class="row g-3" id="quizBadgeGrid">
+        </div>
     </div>
   </div>
 
-  <!-- Firebase 資料取得 -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script type="module" src="./navbar-auth-status.js"></script>
+
   <script type="module">
-    import { auth } from './firebase-init.js';
-    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
-    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+    import { observeUser, getUserData } from './firebase-auth-utils.js';
 
-    const db = getFirestore();
-
-    onAuthStateChanged(auth, async (user) => {
-      const emailDisplay = document.getElementById("userEmail");
+    document.addEventListener('DOMContentLoaded', () => {
+      const userEmailSpan = document.getElementById("userEmail");
       const progressList = document.getElementById("progressList");
-      const badgeGrid = document.getElementById("badgeGrid");
+      const quizBadgeGrid = document.getElementById("quizBadgeGrid");
 
-      if (user) {
-        emailDisplay.textContent = user.email;
-        const uid = user.uid;
-        const userRef = doc(db, "users", uid);
-        const docSnap = await getDoc(userRef);
+      // 定義所有學習單元和測驗單元，用於遍歷和顯示
+      const learningUnits = ["單母音", "複合母音", "單子音", "複合子音"]; // 字卡學習單元
+      const quizUnits = ["單母音", "複合母音", "單子音", "複合子音"]; // 測驗單元
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
+      observeUser(async (user) => {
+        if (user) {
+          userEmailSpan.textContent = user.email;
+          const userData = await getUserData(user.uid);
 
-          // 顯示學習進度
-          const progress = data.progress || {};
-          const units = [
-            "單母音", "複合母音", "單子音", "複合子音",
-            "單字一", "單字二", "單字三", "單字四", "單字五"
-          ];
+          // 顯示學習進度 (字卡)
+          progressList.innerHTML = ''; // 清空舊內容
+          const learnedCards = userData.learnedCards || {}; // 從 learnedCards 獲取進度
+          const quizProgress = userData.progress || {}; // 從 progress 獲取舊的學習進度（這裡應是 '完成學習' 或 '未完成學習' 或 '未學習'）
 
-          units.forEach(unit => {
-            const status = progress[unit] || "未學習";
+          // 這裡需要為每個學習單元定義總字卡數，以便判斷 '完成學習' 狀態
+          const totalCardsMap = {
+            "單母音": 10,
+            "複合母音": 11, // 根據 fm.html 的 data 數量
+            "單子音": 14, // 根據 dz.html 的 data 數量
+            "複合子音": 5  // 根據 fz.html 的 data 數量
+          };
+
+          learningUnits.forEach(unit => {
+            const currentLearned = learnedCards[unit] ? new Set(learnedCards[unit]) : new Set();
+            const total = totalCardsMap[unit];
+            let status = "未學習"; // 預設狀態
+
+            if (currentLearned.size > 0 && currentLearned.size < total) {
+              status = "未完成學習";
+            } else if (currentLearned.size === total) {
+              status = "完成學習";
+            }
+            // 如果後續還有舊的 'progress' 字段的邏輯，這裡可以做兼容性處理
+            // if (quizProgress[unit] === '已完成') { status = '已完成'; } // 優先顯示測驗結果
+
             const li = document.createElement("li");
             li.className = "list-group-item d-flex justify-content-between align-items-center";
             li.innerHTML = `
               ${unit}
-              <span class="badge bg-${status === '已完成' ? 'success' : (status === '未完成' ? 'warning text-dark' : 'secondary')} badge-status">
+              <span class="badge bg-${status === '完成學習' ? 'success' : (status === '未完成學習' ? 'warning text-dark' : 'secondary')} badge-status">
                 ${status}
               </span>
             `;
             progressList.appendChild(li);
           });
 
-          // 顯示測驗徽章
-          const badges = data.badges || [];
-          units.forEach(unit => {
-            const passed = badges.includes(unit);
+          // 顯示測驗進度 (徽章)
+          quizBadgeGrid.innerHTML = ''; // 清空舊內容
+          const badges = userData.badges || []; // 測驗通過的徽章
+
+          quizUnits.forEach(unit => {
+            const hasPassedQuiz = badges.includes(unit);
+            let quizStatus = "未測驗";
+            let badgeColor = "secondary"; // 未測驗
+            let icon = "❓";
+
+            if (hasPassedQuiz) {
+              quizStatus = "測驗通過";
+              badgeColor = "success";
+              icon = "✅";
+            } else {
+              // 如果在 badges 中沒有，並且之前測驗過但沒通過，也可以顯示 '尚未通過'
+              // 目前設計是只要沒通過就不會加入 badges，所以直接顯示 '尚未通過'
+              // 如果需要更精確的 "尚未通過" 狀態，需要 Firestore 額外字段記錄每次測驗結果
+              // 但按照目前的邏輯，沒有通過就等於沒有徽章，顯示「尚未通過」是合理的。
+              quizStatus = "尚未通過"; // 這裡可以根據需要調整為「尚未通過」或「未測驗」
+              badgeColor = "danger"; // 紅色表示尚未通過
+              icon = "❌";
+            }
+            
             const col = document.createElement("div");
             col.className = "col-md-4 col-sm-6";
             col.innerHTML = `
-              <div class="card text-center border-${passed ? 'success' : 'secondary'}">
+              <div class="card text-center border-${badgeColor}">
                 <div class="card-body">
                   <h6 class="card-title">${unit}</h6>
-                  <p class="card-text">
-                    ${passed ? '✅ 測驗通過' : '❌ 尚未通過'}
+                  <p class="card-text card-text-quiz">
+                    ${icon} ${quizStatus}
                   </p>
                 </div>
               </div>
             `;
-            badgeGrid.appendChild(col);
+            quizBadgeGrid.appendChild(col);
           });
+
         } else {
-          emailDisplay.textContent += "（未找到資料）";
+          userEmailSpan.textContent = "尚未登入";
+          progressList.innerHTML = '<li class="list-group-item text-muted">登入後可查看學習進度。</li>';
+          quizBadgeGrid.innerHTML = '<div class="col-12 text-muted">登入後可查看測驗進度。</div>';
         }
-      } else {
-        emailDisplay.textContent = "尚未登入";
-      }
+      });
     });
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

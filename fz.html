@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>單母音 - 韓文40音</title>
+  <title>複合子音 - 韓文40音</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     .korean-box {
@@ -14,10 +14,14 @@
       background-color: #ffffff;
       cursor: pointer;
       text-align: center;
-      transition: transform 0.2s;
+      transition: background-color 0.2s, transform 0.2s;
     }
     .korean-box:hover {
       background-color: #e6f0ff;
+    }
+    .korean-box.learned { /* 新增樣式，表示已學習 */
+      background-color: #d4edda; /* 淺綠色 */
+      border-color: #28a745;
     }
 
     .avatar {
@@ -37,57 +41,67 @@
       align-items: center;
       z-index: 1050;
     }
-
-    .card-popup {
-      background: white;
+    .modal-content {
+      background: #fff;
       padding: 30px;
-      border-radius: 12px;
+      border-radius: 10px;
       text-align: center;
-      max-width: 300px;
-      width: 90%;
       position: relative;
+      width: 90%;
+      max-width: 500px;
     }
-
-    .card-popup .korean-char {
+    .modal-content h3 {
       font-size: 4rem;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
     }
-
-    .nav-btn {
+    .modal-content p {
+      font-size: 1.5rem;
+      color: #555;
+    }
+    .modal-nav-btn {
       position: absolute;
       top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.8);
+      border: none;
+      font-size: 2rem;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    #prevBtn { left: 10px; }
+    #nextBtn { right: 10px; }
+    #audioBtn {
+      font-size: 2rem;
+      margin-top: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #007bff;
+    }
+    #audioBtn:hover {
+      color: #0056b3;
+    }
+    #closePopupBtn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
       font-size: 2rem;
       background: none;
       border: none;
-      color: #333;
       cursor: pointer;
-      user-select: none;
+      color: #666;
     }
-
-    .nav-btn:hover {
-      color: #007bff;
-    }
-
-    .nav-prev {
-      left: -50px;
-    }
-
-    .nav-next {
-      right: -50px;
-    }
-
-    @media (max-width: 768px) {
-      .nav-btn {
-        display: none;
-      }
+    #closePopupBtn:hover {
+      color: #333;
     }
   </style>
 </head>
 <body class="bg-light">
 
-  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4">
-    <a class="navbar-brand" href="fp.html">回首頁</a>
+    <a class="navbar-brand" href="fp.html">韓文學習網</a>
+
     <a class="nav-link" href="lh.html">回單元選擇</a>
 
     <div class="dropdown ms-3">
@@ -107,7 +121,7 @@
         <img src="https://via.placeholder.com/40" class="avatar" alt="User">
       </a>
       <ul class="dropdown-menu dropdown-menu-end">
-        <li><span class="dropdown-item-text" id="accountEmail">尚未登入</span></li>
+        <li><span class="dropdown-item-text" id="accountEmail">載入中...</span></li>
         <li><hr class="dropdown-divider"></li>
         <li><a class="dropdown-item text-primary" href="account.html">帳號狀態</a></li>
         <li><a class="dropdown-item text-danger" href="#" id="logoutBtn" style="display: none;">登出</a></li>
@@ -116,84 +130,166 @@
     </div>
   </nav>
 
-  <!-- 主內容 -->
-  <div class="container text-center mt-4">
-    <h2 class="mb-4">複合子音</h2>
-
-    <div class="row row-cols-5 justify-content-center">
-      <!-- 動態插入 -->
-    </div>
+  <div class="container py-5">
+    <h2 class="text-center mb-4">複合子音</h2>
+    <div class="row row-cols-2 row-cols-md-4 g-4" id="koreanGrid">
+      </div>
   </div>
 
-  <!-- 放大卡片 -->
-  <div class="modal-overlay" id="popupOverlay" onclick="closePopup(event)">
-    <div class="card-popup" id="popupContent">
-      <button class="nav-btn nav-prev" onclick="prevCard(event)">&#8592;</button>
-      <div class="korean-char" id="popupChar">ㅏ</div>
-      <div id="popupRoman">a</div>
-      <button class="btn btn-outline-primary mt-3" onclick="playAudio()">播放發音</button>
-      <button class="nav-btn nav-next" onclick="nextCard(event)">&#8594;</button>
+  <div class="modal-overlay" id="popupOverlay">
+    <div class="modal-content">
+      <button id="closePopupBtn" class="close-btn">&times;</button>
+      <h3 id="popupChar"></h3>
+      <p id="popupRoman"></p>
+      <button id="audioBtn">🔊</button>
+      <button id="prevBtn" class="modal-nav-btn">⬅️</button>
+      <button id="nextBtn" class="modal-nav-btn">➡️</button>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-        const data = [
-        { char: "ㄲ", roman: "kk", audio: "https://dict.naver.com/file/tts/tts.mp3?id=1000009383" },
-        { char: "ㄸ", roman: "tt", audio: "https://dict.naver.com/file/tts/tts.mp3?id=1000009385" },
-        { char: "ㅃ", roman: "pp", audio: "https://dict.naver.com/file/tts/tts.mp3?id=1000009387" },
-        { char: "ㅆ", roman: "ss", audio: "https://dict.naver.com/file/tts/tts.mp3?id=1000009389" },
-        { char: "ㅉ", roman: "jj", audio: "https://dict.naver.com/file/tts/tts.mp3?id=1000009391" }
-        ];
+  
+  <script type="module" src="./navbar-auth-status.js"></script>
 
-    const row = document.querySelector(".row");
+  <script type="module">
+    import { observeUser, updateUserCardProgress, getUserData } from './firebase-auth-utils.js';
+
+    const unitName = "複合子音"; // 這個單元的名稱，用於 Firestore 記錄
+    const data = [
+      { char: "ㄲ", roman: "kk", audio: "https://dweb.file.kext.link/audio/koreana/kk.mp3" },
+      { char: "ㄸ", roman: "tt", audio: "https://dweb.file.kext.link/audio/koreana/tt.mp3" },
+      { char: "ㅃ", roman: "pp", audio: "https://dweb.file.kext.link/audio/koreana/pp.mp3" },
+      { char: "ㅆ", roman: "ss", audio: "https://dweb.file.kext.link/audio/koreana/ss.mp3" },
+      { char: "ㅉ", roman: "jj", audio: "https://dweb.file.kext.link/audio/koreana/jj.mp3" }
+    ];
+
+    const koreanGrid = document.getElementById("koreanGrid");
+    const popupOverlay = document.getElementById("popupOverlay");
+    const popupChar = document.getElementById("popupChar");
+    const popupRoman = document.getElementById("popupRoman");
+    const audioBtn = document.getElementById("audioBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const closePopupBtn = document.getElementById("closePopupBtn");
+
     let currentIndex = 0;
+    let currentUser = null;
+    let learnedCardsIndices = new Set(); // 儲存已點擊字卡的索引
 
-    // 建立字卡
-    data.forEach((item, index) => {
-      const div = document.createElement("div");
-      div.className = "col korean-box";
-      div.textContent = item.char;
-      div.onclick = () => openPopup(index);
-      row.appendChild(div);
+    document.addEventListener('DOMContentLoaded', () => {
+      // 監聽使用者登入狀態
+      observeUser(user => {
+        currentUser = user;
+        if (currentUser) {
+          loadUserProgress(); // 登入後載入進度
+        } else {
+          renderCards(); // 未登入也顯示字卡，但不標記進度
+        }
+      });
+
+      // 彈出視窗事件監聽
+      popupOverlay.addEventListener("click", closePopup);
+      closePopupBtn.addEventListener("click", () => popupOverlay.style.display = "none");
+      prevBtn.addEventListener("click", prevCard);
+      nextBtn.addEventListener("click", nextCard);
+      audioBtn.addEventListener("click", playAudio);
+
+      // 鍵盤事件監聽
+      document.addEventListener("keydown", (e) => {
+        if (popupOverlay.style.display === "flex") { // 彈窗開啟時
+          if (e.key === "ArrowLeft") {
+            prevCard(e);
+          } else if (e.key === "ArrowRight") {
+            nextCard(e);
+          } else if (e.key === "Escape") {
+            closePopup(e);
+          } else if (e.key === " ") { // Spacebar to play audio
+            e.preventDefault(); // Prevent scrolling
+            playAudio();
+          }
+        }
+      });
     });
 
-    function openPopup(index) {
-      currentIndex = index;
-      const item = data[index];
-      document.getElementById("popupChar").textContent = item.char;
-      document.getElementById("popupRoman").textContent = item.roman;
-      document.getElementById("popupOverlay").style.display = "flex";
+    // 載入使用者學習進度並渲染字卡
+    async function loadUserProgress() {
+      if (!currentUser) {
+        renderCards(); // 未登入，只顯示字卡
+        return;
+      }
+      try {
+        const userData = await getUserData(currentUser.uid);
+        if (userData && userData.learnedCards && userData.learnedCards[unitName]) {
+          learnedCardsIndices = new Set(userData.learnedCards[unitName]);
+        } else {
+          learnedCardsIndices = new Set(); // 沒資料就初始化為空集合
+        }
+      } catch (error) {
+        console.error("載入使用者進度失敗:", error);
+        learnedCardsIndices = new Set(); // 載入失敗也初始化為空集合
+      }
+      renderCards(); // 載入進度後渲染字卡
     }
 
-    function closePopup(e) {
-      if (e.target.id === "popupOverlay") {
-        document.getElementById("popupOverlay").style.display = "none";
+    // 渲染字卡
+    function renderCards() {
+      koreanGrid.innerHTML = ''; // 清空現有的字卡
+      data.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = `col-6 col-md-4 col-lg-3 korean-box ${learnedCardsIndices.has(index) ? 'learned' : ''}`;
+        div.textContent = item.char;
+        div.onclick = () => openPopup(index);
+        koreanGrid.appendChild(div);
+      });
+    }
+
+    // 打開彈出視窗並記錄進度
+    async function openPopup(index) {
+      currentIndex = index;
+      const item = data[index];
+      popupChar.textContent = item.char;
+      popupRoman.textContent = item.roman;
+      popupOverlay.style.display = "flex";
+
+      // 如果已登入，才記錄學習進度
+      if (currentUser && !learnedCardsIndices.has(index)) {
+        learnedCardsIndices.add(index);
+        try {
+          await updateUserCardProgress(currentUser.uid, unitName, index, data.length);
+          // 點擊後重新渲染字卡，更新已學習標記
+          renderCards();
+        } catch (error) {
+          console.error("更新字卡進度失敗:", error);
+        }
       }
     }
 
+    // 關閉彈出視窗
+    function closePopup(e) {
+      if (e.target === popupOverlay || e.target === closePopupBtn) {
+        popupOverlay.style.display = "none";
+      }
+    }
+
+    // 上一張字卡
     function prevCard(e) {
       e.stopPropagation();
       currentIndex = (currentIndex - 1 + data.length) % data.length;
       openPopup(currentIndex);
     }
 
+    // 下一張字卡
     function nextCard(e) {
       e.stopPropagation();
       currentIndex = (currentIndex + 1) % data.length;
       openPopup(currentIndex);
     }
 
+    // 播放音頻
     function playAudio() {
       const audio = new Audio(data[currentIndex].audio);
       audio.play();
     }
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        document.getElementById("popupOverlay").style.display = "none";
-      }
-    });
   </script>
 </body>
 </html>

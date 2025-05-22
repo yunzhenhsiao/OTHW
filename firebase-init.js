@@ -13,6 +13,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app); // ✅ 新增這行
+const db = getFirestore(app);
 
-export { auth, db }; // ✅ 同時匯出 db
+export { auth, db };

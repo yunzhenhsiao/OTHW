@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>單母音測驗 - 韓文40音</title>
+  <title>單子音測驗 - 韓文40音</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     .option-btn {
@@ -28,10 +28,10 @@
 </head>
 <body class="bg-light">
 
-  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4">
-    <a class="navbar-brand" href="fp.html">回首頁</a>
-    <a class="nav-link" href="lh.html">單元選擇</a>
+    <a class="navbar-brand" href="fp.html">韓文學習網</a>
+
+    <a class="nav-link" href="lh.html">回單元選擇</a>
 
     <div class="dropdown ms-3">
       <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -50,7 +50,7 @@
         <img src="https://via.placeholder.com/40" class="avatar" alt="User">
       </a>
       <ul class="dropdown-menu dropdown-menu-end">
-        <li><span class="dropdown-item-text" id="accountEmail">尚未登入</span></li>
+        <li><span class="dropdown-item-text" id="accountEmail">載入中...</span></li>
         <li><hr class="dropdown-divider"></li>
         <li><a class="dropdown-item text-primary" href="account.html">帳號狀態</a></li>
         <li><a class="dropdown-item text-danger" href="#" id="logoutBtn" style="display: none;">登出</a></li>
@@ -59,116 +59,180 @@
     </div>
   </nav>
 
-  <!-- 內容 -->
-  <div class="container text-center mt-5">
-    <h2 class="mb-4">單子音測驗</h2>
-    <div class="quiz-box bg-white p-4 rounded shadow-sm">
-      <div id="question" class="display-4 mb-4">ㅏ</div>
-      <div id="options" class="d-flex flex-wrap justify-content-center"></div>
-      <div id="feedback" class="feedback"></div>
+  <div class="container py-5">
+    <h2 class="text-center mb-4">單子音測驗</h2>
+
+    <div class="quiz-box border rounded p-4 bg-white shadow-sm text-center">
+      <h4 id="questionChar"></h4>
+      <div id="optionsBox" class="d-flex flex-wrap justify-content-center mt-4">
+        </div>
+      <p id="feedback" class="feedback mt-3"></p>
+      <div id="quizProgress" class="mt-4">
+        <span id="currentQuestionNum">1</span> / <span id="totalQuestionsNum"></span>
+      </div>
     </div>
   </div>
 
-  <script>
-    const data = [
-        { char: "ㄱ", roman: "g/k" },
-        { char: "ㄴ", roman: "n" },
-        { char: "ㄷ", roman: "d/t" },
-        { char: "ㄹ", roman: "r/l" },
-        { char: "ㅁ", roman: "m" },
-        { char: "ㅂ", roman: "b/p" },
-        { char: "ㅅ", roman: "s" },
-        { char: "ㅇ", roman: "ng" },
-        { char: "ㅈ", roman: "j" },
-        { char: "ㅊ", roman: "ch" },
-        { char: "ㅋ", roman: "k" },
-        { char: "ㅌ", roman: "t" },
-        { char: "ㅍ", roman: "p" },
-        { char: "ㅎ", roman: "h" }
-        ];
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script type="module" src="./navbar-auth-status.js"></script>
 
-    let quizData = [];
+  <script type="module">
+    import { observeUser, updateUserProgressAndBadges } from './firebase-auth-utils.js';
+    import { auth } from './firebase-init.js';
+
+    // 這裡是單子音的測驗資料
+    const quizData = [
+      { char: "ㄱ", roman: "g/k", options: ["g/k", "n", "d/t", "r/l"] },
+      { char: "ㄴ", roman: "n", options: ["n", "g/k", "m", "s"] },
+      { char: "ㄷ", roman: "d/t", options: ["d/t", "r/l", "b/p", "j"] },
+      { char: "ㄹ", roman: "r/l", options: ["r/l", "s", "ng", "ch"] },
+      { char: "ㅁ", roman: "m", options: ["m", "b/p", "s", "j"] },
+      { char: "ㅂ", roman: "b/p", options: ["b/p", "s", "j", "m"] },
+      { char: "ㅅ", roman: "s", options: ["s", "z", "sh", "ch"] },
+      { char: "ㅇ", roman: "ng", options: ["ng", "g/k", "n", "m"] },
+      { char: "ㅈ", roman: "j", options: ["j", "ch", "k", "t"] },
+      { char: "ㅊ", roman: "ch", options: ["ch", "k", "t", "p"] },
+      { char: "ㅋ", roman: "k", options: ["k", "t", "p", "h"] },
+      { char: "ㅌ", roman: "t", options: ["t", "p", "h", "k"] },
+      { char: "ㅍ", roman: "p", options: ["p", "h", "k", "t"] },
+      { char: "ㅎ", roman: "h", options: ["h", "k", "t", "p"] }
+    ];
+
     let currentIndex = 0;
     let score = 0;
+    let currentUser = null;
 
-    function shuffle(array) {
-      return array.sort(() => Math.random() - 0.5);
+    let questionChar;
+    let optionsBox;
+    let feedback;
+    let currentQuestionNum;
+    let totalQuestionsNum;
+    const quizBox = document.querySelector(".quiz-box");
+
+    function getQuizElements() {
+      questionChar = document.getElementById("questionChar");
+      optionsBox = document.getElementById("optionsBox");
+      feedback = document.getElementById("feedback");
+      currentQuestionNum = document.getElementById("currentQuestionNum");
+      totalQuestionsNum = document.getElementById("totalQuestionsNum");
     }
 
-    function generateQuiz() {
-      quizData = shuffle([...data]);
-      currentIndex = 0;
-      score = 0;
+    document.addEventListener('DOMContentLoaded', () => {
+      getQuizElements();
+      observeUser(user => {
+        currentUser = user;
+      });
+      if (totalQuestionsNum) {
+          totalQuestionsNum.textContent = quizData.length;
+      }
       showQuestion();
-    }
+    });
 
     function showQuestion() {
+      if (!questionChar || !optionsBox || !feedback || !currentQuestionNum || !totalQuestionsNum) {
+          console.error("Quiz elements are missing. Re-getting elements.");
+          getQuizElements();
+          if (!questionChar || !optionsBox) {
+              console.error("Critical quiz elements still missing. Cannot proceed with showQuestion.");
+              return;
+          }
+      }
+
       const item = quizData[currentIndex];
-      document.getElementById("question").textContent = item.char;
-      document.getElementById("feedback").textContent = "";
+      questionChar.textContent = item.char;
+      optionsBox.innerHTML = '';
+      feedback.textContent = '';
 
-      // 建立選項
-      const optionsBox = document.getElementById("options");
-      optionsBox.innerHTML = "";
+      const shuffledOptions = [...item.options].sort(() => Math.random() - 0.5);
 
-      // 隨機抽出3個錯的選項（不包含正確的）
-      const distractors = shuffle(data.filter(d => d.roman !== item.roman)).slice(0, 3);
-      const allOptions = shuffle([item.roman, ...distractors.map(d => d.roman)]);
-
-      allOptions.forEach(opt => {
+      shuffledOptions.forEach(opt => {
         const btn = document.createElement("button");
-        btn.className = "btn btn-outline-secondary option-btn";
+        btn.className = "btn btn-outline-primary option-btn";
         btn.textContent = opt;
         btn.onclick = () => checkAnswer(opt, item.roman);
         optionsBox.appendChild(btn);
       });
+
+      currentQuestionNum.textContent = currentIndex + 1;
     }
 
     function checkAnswer(selected, correct) {
-        const feedback = document.getElementById("feedback");
-        if (selected === correct) {
-            feedback.textContent = "✅ 正確！";
-            score++;
+      document.querySelectorAll(".option-btn").forEach(btn => btn.disabled = true);
+
+      if (selected === correct) {
+        feedback.textContent = "✅ 正確！";
+        score++;
+      } else {
+        feedback.textContent = `❌ 錯誤，正確答案是 ${correct}`;
+      }
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < quizData.length) {
+          showQuestion();
         } else {
-            feedback.textContent = `❌ 錯誤，正確答案是 ${correct}`;
+          showResult();
         }
-
-        // 禁用按鈕
-        document.querySelectorAll(".option-btn").forEach(btn => btn.disabled = true);
-
-        // 自動進下一題（延遲 1 秒）
-        setTimeout(() => {
-            currentIndex++;
-            if (currentIndex < quizData.length) {
-            showQuestion();
-            } else {
-            showResult();
-            }
-        }, 1000);
+      }, 1000);
     }
 
-
-    function nextQuestion() {
-      currentIndex++;
-      if (currentIndex < quizData.length) {
-        showQuestion();
+    async function showResult() {
+      const passed = (score === quizData.length);
+      let resultHtml = '';
+      if (passed) {
+        resultHtml = `<h3>🎉 恭喜你，全對通過測驗！</h3>`;
       } else {
-        showResult();
+        resultHtml = `<h3>💡 你答對 ${score}/${quizData.length} 題，再試一次吧！</h3>`;
+      }
+
+      if (currentUser) {
+        const unitName = "單子音"; // <<-- 這是這個測驗的單元名稱
+        try {
+          await updateUserProgressAndBadges(currentUser.uid, unitName, passed);
+          console.log("測驗結果已記錄到 Firestore。");
+          if (passed) {
+            resultHtml += `<p class="text-success mt-3">您的測驗結果已成功記錄！</p>`;
+          }
+        } catch (error) {
+          console.error("記錄測驗結果到 Firestore 失敗:", error);
+          resultHtml += `<p class="text-danger mt-3">記錄測驗結果失敗，請檢查網路或稍後再試。</p>`;
+        }
+      } else {
+        console.log("使用者未登入，測驗結果不記錄。");
+        const loginPrompt = document.createElement('p');
+        loginPrompt.className = 'mt-3 text-muted';
+        loginPrompt.innerHTML = '登入後可記錄您的學習進度！<a href="login.html">前往登入</a>';
+        resultHtml += loginPrompt.outerHTML;
+      }
+
+      resultHtml += `<button class="btn btn-info mt-3" id="restartQuizBtn">重新測驗</button>`;
+      quizBox.innerHTML = resultHtml;
+
+      const restartBtn = document.getElementById("restartQuizBtn");
+      if (restartBtn) {
+        restartBtn.addEventListener("click", restartQuiz);
       }
     }
 
-    function showResult() {
-    const container = document.querySelector(".quiz-box");
-    if (score === quizData.length) {
-        container.innerHTML = `<h3>🎉 恭喜你，全對通過測驗！</h3>`;
-    } else {
-        container.innerHTML = `<h3>💡 你答對 ${score}/${quizData.length} 題，再試一次吧！</h3>
-        <button class="btn btn-secondary mt-3" onclick="location.reload()">重新測驗</button>`;
-        }
-    }
+    function restartQuiz() {
+      currentIndex = 0;
+      score = 0;
 
-    generateQuiz();
+      quizBox.innerHTML = `
+        <h4 id="questionChar"></h4>
+        <div id="optionsBox" class="d-flex flex-wrap justify-content-center mt-4">
+          </div>
+        <p id="feedback" class="feedback mt-3"></p>
+        <div id="quizProgress" class="mt-4">
+          <span id="currentQuestionNum">1</span> / <span id="totalQuestionsNum"></span>
+        </div>
+      `;
+
+      getQuizElements();
+      totalQuestionsNum.textContent = quizData.length;
+      showQuestion();
+    }
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

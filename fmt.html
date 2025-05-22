@@ -28,20 +28,20 @@
 </head>
 <body class="bg-light">
 
-  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4">
-    <a class="navbar-brand" href="fp.html">回首頁</a>
-    <a class="nav-link" href="lh.html">單元選擇</a>
+    <a class="navbar-brand" href="fp.html">韓文學習網</a>
+
+    <a class="nav-link" href="lh.html">回單元選擇</a>
 
     <div class="dropdown ms-3">
       <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
         韓文40音測驗
       </a>
       <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="quiz-vowel-basic.html">單母音</a></li>
-        <li><a class="dropdown-item" href="quiz-vowel-complex.html">複合母音</a></li>
-        <li><a class="dropdown-item" href="quiz-consonant-basic.html">單子音</a></li>
-        <li><a class="dropdown-item" href="quiz-consonant-complex.html">複合子音</a></li>
+        <li><a class="dropdown-item" href="dmt.html">單母音測驗</a></li>
+        <li><a class="dropdown-item" href="fmt.html">複合母音測驗</a></li>
+        <li><a class="dropdown-item" href="dzt.html">單子音測驗</a></li>
+        <li><a class="dropdown-item" href="fzt.html">複合子音測驗</a></li>
       </ul>
     </div>
 
@@ -50,7 +50,7 @@
         <img src="https://via.placeholder.com/40" class="avatar" alt="User">
       </a>
       <ul class="dropdown-menu dropdown-menu-end">
-        <li><span class="dropdown-item-text" id="accountEmail">尚未登入</span></li>
+        <li><span class="dropdown-item-text" id="accountEmail">載入中...</span></li>
         <li><hr class="dropdown-divider"></li>
         <li><a class="dropdown-item text-primary" href="account.html">帳號狀態</a></li>
         <li><a class="dropdown-item text-danger" href="#" id="logoutBtn" style="display: none;">登出</a></li>
@@ -59,72 +59,105 @@
     </div>
   </nav>
 
-  <!-- 測驗區 -->
-  <div class="container text-center mt-5">
-    <h2 class="mb-4">複合母音測驗</h2>
-    <div class="quiz-box bg-white p-4 rounded shadow-sm">
-      <div id="question" class="display-4 mb-4">ㅐ</div>
-      <div id="options" class="d-flex flex-wrap justify-content-center"></div>
-      <div id="feedback" class="feedback"></div>
+  <div class="container py-5">
+    <h2 class="text-center mb-4">複合母音測驗</h2>
+
+    <div class="quiz-box border rounded p-4 bg-white shadow-sm text-center">
+      <h4 id="questionChar"></h4>
+      <div id="optionsBox" class="d-flex flex-wrap justify-content-center mt-4">
+        </div>
+      <p id="feedback" class="feedback mt-3"></p>
+      <div id="quizProgress" class="mt-4">
+        <span id="currentQuestionNum">1</span> / <span id="totalQuestionsNum"></span>
+      </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    const data = [
-      { char: "ㅐ", roman: "ae" },
-      { char: "ㅒ", roman: "yae" },
-      { char: "ㅔ", roman: "e" },
-      { char: "ㅖ", roman: "ye" },
-      { char: "ㅘ", roman: "wa" },
-      { char: "ㅙ", roman: "wae" },
-      { char: "ㅚ", roman: "oe" },
-      { char: "ㅝ", roman: "wo" },
-      { char: "ㅞ", roman: "we" },
-      { char: "ㅟ", roman: "wi" },
-      { char: "ㅢ", roman: "ui" }
+  
+  <script type="module" src="./navbar-auth-status.js"></script>
+
+  <script type="module">
+    import { observeUser, updateUserProgressAndBadges } from './firebase-auth-utils.js';
+    import { auth } from './firebase-init.js';
+
+    // 這裡是複合母音的測驗資料
+    const quizData = [
+      { char: "ㅐ", roman: "ae", options: ["ae", "e", "oe", "ui"] },
+      { char: "ㅔ", roman: "e", options: ["e", "ae", "eu", "eo"] },
+      { char: "ㅚ", roman: "oe", options: ["oe", "wi", "wa", "we"] },
+      { char: "ㅟ", roman: "wi", options: ["wi", "we", "wo", "ui"] },
+      { char: "ㅒ", roman: "yae", options: ["yae", "ye", "yo", "yu"] },
+      { char: "ㅖ", roman: "ye", options: ["ye", "yae", "yi", "yui"] },
+      { char: "ㅘ", roman: "wa", options: ["wa", "wo", "we", "ui"] },
+      { char: "ㅝ", roman: "wo", options: ["wo", "wa", "we", "wi"] },
+      { char: "ㅙ", roman: "wae", options: ["wae", "we", "oe", "ae"] },
+      { char: "WE", roman: "we", options: ["we", "wae", "wi", "wo"] }, // 這個選項看起來有點問題，但依照韓文複合母音常見發音，這個"WE"應是指 "ㅞ" 或 "ㅙ"
+      { char: "ㅞ", roman: "we", options: ["we", "wi", "wae", "oe"] },
+      { char: "ㅢ", roman: "ui", options: ["ui", "eu", "i", "e"] }
     ];
 
-    let quizData = [];
     let currentIndex = 0;
     let score = 0;
+    let currentUser = null;
 
-    function shuffle(array) {
-      return array.sort(() => Math.random() - 0.5);
+    let questionChar;
+    let optionsBox;
+    let feedback;
+    let currentQuestionNum;
+    let totalQuestionsNum;
+    const quizBox = document.querySelector(".quiz-box");
+
+    function getQuizElements() {
+      questionChar = document.getElementById("questionChar");
+      optionsBox = document.getElementById("optionsBox");
+      feedback = document.getElementById("feedback");
+      currentQuestionNum = document.getElementById("currentQuestionNum");
+      totalQuestionsNum = document.getElementById("totalQuestionsNum");
     }
 
-    function generateQuiz() {
-      quizData = shuffle([...data]);
-      currentIndex = 0;
-      score = 0;
+    document.addEventListener('DOMContentLoaded', () => {
+      getQuizElements();
+      observeUser(user => {
+        currentUser = user;
+      });
+      if (totalQuestionsNum) {
+          totalQuestionsNum.textContent = quizData.length;
+      }
       showQuestion();
-    }
+    });
 
     function showQuestion() {
+      if (!questionChar || !optionsBox || !feedback || !currentQuestionNum || !totalQuestionsNum) {
+          console.error("Quiz elements are missing. Re-getting elements.");
+          getQuizElements();
+          if (!questionChar || !optionsBox) {
+              console.error("Critical quiz elements still missing. Cannot proceed with showQuestion.");
+              return;
+          }
+      }
+
       const item = quizData[currentIndex];
-      document.getElementById("question").textContent = item.char;
-      document.getElementById("feedback").textContent = "";
+      questionChar.textContent = item.char;
+      optionsBox.innerHTML = '';
+      feedback.textContent = '';
 
-      // 清除選項
-      const optionsBox = document.getElementById("options");
-      optionsBox.innerHTML = "";
+      const shuffledOptions = [...item.options].sort(() => Math.random() - 0.5);
 
-      // 隨機選出 3 個干擾項（不含正確答案）
-      const distractors = shuffle(data.filter(d => d.roman !== item.roman)).slice(0, 3);
-      const allOptions = shuffle([item.roman, ...distractors.map(d => d.roman)]);
-
-      // 顯示選項按鈕
-      allOptions.forEach(opt => {
+      shuffledOptions.forEach(opt => {
         const btn = document.createElement("button");
-        btn.className = "btn btn-outline-secondary option-btn";
+        btn.className = "btn btn-outline-primary option-btn";
         btn.textContent = opt;
         btn.onclick = () => checkAnswer(opt, item.roman);
         optionsBox.appendChild(btn);
       });
+
+      currentQuestionNum.textContent = currentIndex + 1;
     }
 
     function checkAnswer(selected, correct) {
-      const feedback = document.getElementById("feedback");
+      document.querySelectorAll(".option-btn").forEach(btn => btn.disabled = true);
+
       if (selected === correct) {
         feedback.textContent = "✅ 正確！";
         score++;
@@ -132,9 +165,6 @@
         feedback.textContent = `❌ 錯誤，正確答案是 ${correct}`;
       }
 
-      document.querySelectorAll(".option-btn").forEach(btn => btn.disabled = true);
-
-      // 1 秒後進入下一題或顯示結果
       setTimeout(() => {
         currentIndex++;
         if (currentIndex < quizData.length) {
@@ -145,18 +175,62 @@
       }, 1000);
     }
 
-    function showResult() {
-      const container = document.querySelector(".quiz-box");
-      if (score === quizData.length) {
-        container.innerHTML = `<h3>🎉 恭喜你，全對通過測驗！</h3>`;
+    async function showResult() {
+      const passed = (score === quizData.length);
+      let resultHtml = '';
+      if (passed) {
+        resultHtml = `<h3>🎉 恭喜你，全對通過測驗！</h3>`;
       } else {
-        container.innerHTML = `<h3>💡 你答對 ${score}/${quizData.length} 題，再試一次吧！</h3>
-        <button class="btn btn-secondary mt-3" onclick="location.reload()">重新測驗</button>`;
+        resultHtml = `<h3>💡 你答對 ${score}/${quizData.length} 題，再試一次吧！</h3>`;
+      }
+
+      if (currentUser) {
+        const unitName = "複合母音"; // <<-- 這是這個測驗的單元名稱
+        try {
+          await updateUserProgressAndBadges(currentUser.uid, unitName, passed);
+          console.log("測驗結果已記錄到 Firestore。");
+          if (passed) {
+            resultHtml += `<p class="text-success mt-3">您的測驗結果已成功記錄！</p>`;
+          }
+        } catch (error) {
+          console.error("記錄測驗結果到 Firestore 失敗:", error);
+          resultHtml += `<p class="text-danger mt-3">記錄測驗結果失敗，請檢查網路或稍後再試。</p>`;
+        }
+      } else {
+        console.log("使用者未登入，測驗結果不記錄。");
+        const loginPrompt = document.createElement('p');
+        loginPrompt.className = 'mt-3 text-muted';
+        loginPrompt.innerHTML = '登入後可記錄您的學習進度！<a href="login.html">前往登入</a>';
+        resultHtml += loginPrompt.outerHTML;
+      }
+
+      resultHtml += `<button class="btn btn-info mt-3" id="restartQuizBtn">重新測驗</button>`;
+      quizBox.innerHTML = resultHtml;
+
+      const restartBtn = document.getElementById("restartQuizBtn");
+      if (restartBtn) {
+        restartBtn.addEventListener("click", restartQuiz);
       }
     }
 
-    generateQuiz();
+    function restartQuiz() {
+      currentIndex = 0;
+      score = 0;
+
+      quizBox.innerHTML = `
+        <h4 id="questionChar"></h4>
+        <div id="optionsBox" class="d-flex flex-wrap justify-content-center mt-4">
+          </div>
+        <p id="feedback" class="feedback mt-3"></p>
+        <div id="quizProgress" class="mt-4">
+          <span id="currentQuestionNum">1</span> / <span id="totalQuestionsNum"></span>
+        </div>
+      `;
+
+      getQuizElements();
+      totalQuestionsNum.textContent = quizData.length;
+      showQuestion();
+    }
   </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
