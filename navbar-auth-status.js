@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById("logoutBtn");
     const loginLink = document.getElementById("loginLink");
     const userEmailDisplay = document.getElementById("userEmailDisplay"); // 用於顯示頭像旁邊的email或"訪客"
+    const userDisplayNameNav = document.getElementById("userDisplayNameNav"); // 新增：用於導覽列顯示用戶名
+
 
     // 監聽 Firebase 登入狀態
     observeUser(user => {
@@ -20,8 +22,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 userEmailDisplay.querySelector('img').alt = user.email; // 也可以更新圖片的alt屬性
             }
 
-            // 如果有需要，可以將用戶的頭像URL儲存在Firebase Firestore中，然後在這裡加載：
-            // if (userEmailDisplay) userEmailDisplay.querySelector('img').src = user.photoURL || "https://via.placeholder.com/40";
+            // 顯示用戶名，如果沒有設定則顯示 Email
+            if (userDisplayNameNav) {
+                userDisplayNameNav.textContent = user.displayName || user.email;
+            } else if (userEmailDisplay) { // 如果沒有獨立的用戶名顯示元素，可以在這裡調整顯示邏輯
+                userEmailDisplay.textContent = user.displayName || user.email;
+            }
         } else {
             // 未登入
             if (accountEmail) accountEmail.textContent = "尚未登入";
@@ -31,8 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 userEmailDisplay.title = "訪客";
                 userEmailDisplay.querySelector('img').alt = "訪客";
             }
-            // 預設頭像
-            // if (userEmailDisplay) userEmailDisplay.querySelector('img').src = "https://via.placeholder.com/40";
+            
         }
     });
 

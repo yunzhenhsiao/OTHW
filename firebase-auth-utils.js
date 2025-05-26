@@ -4,14 +4,16 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  updateProfile
 } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
 import {
   doc,
   setDoc,
   getDoc,       // <<-- 新增這行
   updateDoc,    // <<-- 新增這行 (上次測驗功能已新增)
-  arrayUnion    // <<-- 新增這行 (上次測驗功能已新增)
+  arrayUnion,
+  updateDoc    // <<-- 新增這行 (上次測驗功能已新增)
 } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
 
 // 註冊功能
@@ -121,4 +123,20 @@ export async function updateUserCardProgress(uid, unitName, cardIndex, totalCard
     console.error("更新使用者字卡進度失敗:", error);
     throw error;
   }
+}
+export async function updateDisplayNameAndFirestore(user, newDisplayName) {
+  if (!user) {
+    throw new Error("沒有登入用戶。");
+  }
+
+  // 1. 更新 Firebase Authentication 的 displayName
+  await updateProfile(user, {
+    displayName: newDisplayName
+  });
+
+  // 2. 更新 Firestore 中的用戶名
+  const userDocRef = doc(db, "users", user.uid);
+  await updateDoc(userDocRef, {
+    displayName: newDisplayName // 將用戶名儲存在 Firestore 中
+  });
 }
