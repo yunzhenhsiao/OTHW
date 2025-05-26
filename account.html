@@ -43,6 +43,17 @@
       <h5>登入帳號：<span id="userEmail">載入中...</span></h5>
     </div>
 
+    <div class="card p-4 mb-4 shadow-sm">
+      <h4 class="card-title">👤 用戶名</h4>
+      <div class="d-flex align-items-center mb-3">
+        <strong class="me-2">當前用戶名：</strong>
+        <span id="currentDisplayName">載入中...</span>
+      </div>
+      <div class="input-group mb-3">
+        <input type="text" class="form-control" id="newDisplayNameInput" placeholder="輸入新用戶名">
+        <button class="btn btn-primary" id="updateDisplayNameBtn">更新用戶名</button>
+      </div>
+    
     <div class="section-title">
       <h4>📘 學習進度</h4>
       <ul class="list-group" id="progressList">
@@ -61,16 +72,19 @@
   <script type="module" src="./navbar-auth-status.js"></script>
 
   <script type="module">
-    import { observeUser, getUserData } from './firebase-auth-utils.js';
+    import { observeUser, getUserData, updateDisplayName } from './firebase-auth-utils.js';
 
     document.addEventListener('DOMContentLoaded', () => {
       const userEmailSpan = document.getElementById("userEmail");
+      const currentDisplayNameSpan = document.getElementById("currentDisplayName"); // 獲取顯示當前用戶名的元素
+      const newDisplayNameInput = document.getElementById("newDisplayNameInput");   // 獲取輸入框
+      const updateDisplayNameBtn = document.getElementById("updateDisplayNameBtn"); // 獲取更新按鈕
       const progressList = document.getElementById("progressList");
       const quizBadgeGrid = document.getElementById("quizBadgeGrid");
 
       // 定義所有學習單元和測驗單元，用於遍歷和顯示
-      const learningUnits = ["單母音", "複合母音", "單子音", "複合子音"]; // 字卡學習單元
-      const quizUnits = ["單母音", "複合母音", "單子音", "複合子音"]; // 測驗單元
+      const learningUnits = ["單母音", "複合母音", "單子音", "複合子音", "單字一", "單字二", "單字三", "單字四", "單字五"]; // 字卡學習單元
+      const quizUnits = ["單母音", "複合母音", "單子音", "複合子音", "單字一", "單字二", "單字三", "單字四", "單字五"]; // 測驗單元
 
       observeUser(async (user) => {
         if (user) {
@@ -87,7 +101,12 @@
             "單母音": 10,
             "複合母音": 11, // 根據 fm.html 的 data 數量
             "單子音": 14, // 根據 dz.html 的 data 數量
-            "複合子音": 5  // 根據 fz.html 的 data 數量
+            "複合子音": 5,  // 根據 fz.html 的 data 數量
+            "單字一": 6, // 根據 voc1.html 的 vocab.length 設置
+            "單字二": 1, // 根據 voc2.html 的 vocab.length 設置
+            "單字三": 1, // 根據 voc3.html 的 vocab.length 設置
+            "單字四": 1, // 根據 voc4.html 的 vocab.length 設置
+            "單字五": 1  // 根據 voc5.html 的 vocab.length 設置
           };
 
           learningUnits.forEach(unit => {
@@ -152,14 +171,35 @@
             `;
             quizBadgeGrid.appendChild(col);
           });
+          // 顯示當前用戶名：優先顯示 Firestore 中的 displayName，如果沒有則顯示 email
+          currentDisplayNameSpan.textContent = userData.displayName || user.email;
+
+          // 為更新用戶名按鈕添加事件監聽器
+          updateDisplayNameBtn.addEventListener("click", async () => {
+            const newName = newDisplayNameInput.value.trim();
+            if (newName) {
+              try {
+                await updateDisplayName(user.uid, newName); // 調用更新用戶名的函數
+                currentDisplayNameSpan.textContent = newName; // 立即更新 UI
+                alert("用戶名更新成功！");
+                newDisplayNameInput.value = ''; // 清空輸入框
+              } catch (error) {
+                console.error("更新用戶名失敗:", error);
+                alert("更新用戶名失敗，請重試。");
+              }
+            } else {
+              alert("用戶名不能為空。");
+            }
+          });
 
         } else {
           userEmailSpan.textContent = "尚未登入";
+          currentDisplayNameSpan.textContent = "尚未登入"; // 登出時也更新
           progressList.innerHTML = '<li class="list-group-item text-muted">登入後可查看學習進度。</li>';
           quizBadgeGrid.innerHTML = '<div class="col-12 text-muted">登入後可查看測驗進度。</div>';
         }
-      });
-    });
-  </script>
+      }); // <-- 關閉 observeUser
+    }); // <-- 關閉 DOMContentLoaded
+    </script>
 </body>
 </html>

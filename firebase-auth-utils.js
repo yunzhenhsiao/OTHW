@@ -4,7 +4,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  updateProfile
 } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
 import {
   doc,
@@ -17,9 +18,16 @@ import {
 // 註冊功能
 export async function registerUser(email, password) {
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const user = userCredential.user; // 獲取使用者物件
   const uid = userCredential.user.uid;
+
+  await updateProfile(user, {
+    displayName: email.split('@')[0]
+  });
+
   await setDoc(doc(db, "users", uid), {
     email: email,
+    displayName: email, // 儲存預設的 displayName
     progress: {},     // 學習進度 (舊的，目前用於測驗結果)
     badges: [],       // 測驗徽章 (用於測驗是否通過)
     learnedCards: {}  // <<-- 新增這行，用於字卡學習進度
@@ -119,6 +127,35 @@ export async function updateUserCardProgress(uid, unitName, cardIndex, totalCard
     console.log(`使用者 ${uid} 的 ${unitName} 字卡進度已更新：${progressStatus}`);
   } catch (error) {
     console.error("更新使用者字卡進度失敗:", error);
+    throw error;
+  }
+}
+
+// /**
+//  * 更新使用者的顯示名稱 (displayName)
+//  * @param {string} uid 使用者的 UID
+//  * @param {string} newDisplayName 新的顯示名稱
+//  */
+export async function updateDisplayName(uid, newDisplayName) { // <-- 新增這個函數
+  const userDocRef = doc(db, "users", uid);
+  try {
+    // 1. 更新 Firebase Authentication 中的 displayName
+    // 獲取當前登入的使用者物件
+    const currentUser = auth.currentUser;
+    if (currentUser && currentUser.uid === uid) {
+      await updateProfile(currentUser, { displayName: newDisplayName });
+      console.log("Firebase Auth display name updated successfully.");
+    } else {
+      console.warn("No current user or UID mismatch for updateProfile. Only Firestore will be updated.");
+    }
+
+    // 2. 更新 Firestore 中的 displayName
+    await updateDoc(userDocRef, {
+      displayName: newDisplayName
+    });
+    console.log(`使用者 ${uid} 的顯示名稱已更新為：${newDisplayName}`);
+  } catch (error) {
+    console.error("更新顯示名稱失敗:", error);
     throw error;
   }
 }

@@ -1,5 +1,5 @@
 // navbar-auth-status.js
-import { observeUser, logoutUser } from './firebase-auth-utils.js';
+import { observeUser, logoutUser, getUserData } from './firebase-auth-utils.js';
 import { auth } from './firebase-init.js'; // 確保 auth 從 firebase-init.js 匯出
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,15 +9,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const userEmailDisplay = document.getElementById("userEmailDisplay"); // 用於顯示頭像旁邊的email或"訪客"
 
     // 監聽 Firebase 登入狀態
-    observeUser(user => {
+    observeUser(async user => {
         if (user) {
             // 已登入
             if (accountEmail) accountEmail.textContent = user.email;
             if (logoutBtn) logoutBtn.style.display = "block";
             if (loginLink) loginLink.style.display = "none";
             if (userEmailDisplay) {
-                userEmailDisplay.title = user.email;
-                userEmailDisplay.querySelector('img').alt = user.email; // 也可以更新圖片的alt屬性
+                const userData = await getUserData(user.uid);
+                const displayUserName = userData?.displayName || user.email; // 優先使用 displayName，否則使用 email
+                userEmailDisplay.title = displayUserName; // 滑鼠懸停提示
+                userEmailDisplay.querySelector('img').alt = displayUserName;
             }
 
             // 如果有需要，可以將用戶的頭像URL儲存在Firebase Firestore中，然後在這裡加載：

@@ -22,7 +22,6 @@
     .avatar {
       width: 40px;
       height: 40px;
-      border-radius: 50%;
       object-fit: cover;
     }
     .modal-overlay {
@@ -35,51 +34,53 @@
       align-items: center;
       z-index: 1050;
     }
-    .card-popup {
-      background: white;
+    .modal-content {
+      background: #fff;
       padding: 30px;
-      border-radius: 12px;
+      border-radius: 10px;
       text-align: center;
-      max-width: 300px;
-      width: 90%;
       position: relative;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
-    .card-popup .vocab-word {
-      font-size: 3rem;
-      margin-bottom: 10px;
-    }
-    .nav-btn {
+    .close-btn {
       position: absolute;
-      top: 50%;
+      top: 10px;
+      right: 15px;
       font-size: 2rem;
-      background: none;
-      border: none;
-      color: #333;
       cursor: pointer;
-      user-select: none;
     }
-    .nav-btn:hover {
+    .popup-word {
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .popup-roman {
+      font-size: 1.5rem;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .popup-meaning {
+      font-size: 1.8rem;
       color: #007bff;
+      margin-bottom: 20px;
     }
-    .nav-prev {
-      left: -50px;
+    .navigation-buttons button {
+      margin: 0 10px;
     }
-    .nav-next {
-      right: -50px;
-    }
-    @media (max-width: 768px) {
-      .nav-btn {
-        display: none;
-      }
+    /* 新增已學習字卡的樣式 */
+    .vocab-box.learned {
+      background-color: #d4edda; /* 淺綠色，表示已學習 */
+      border-color: #28a745;
     }
   </style>
 </head>
 <body class="bg-light">
 
-  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4">
     <a class="navbar-brand" href="fp.html">回首頁</a>
-    <a class="nav-link" href="voc.html">回單字單元選擇</a>
 
     <div class="dropdown ms-3">
       <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -108,81 +109,148 @@
     </div>
   </nav>
 
-  <!-- 主內容 -->
-  <div class="container text-center mt-4">
-    <h2 class="mb-4">單元五</h2>
+  <div class="container text-center mt-5">
+    <h2 class="mb-4">單字學習 - 單元五</h2>
 
-    <div class="row row-cols-3 justify-content-center">
-      <!-- 動態插入單字卡 -->
-    </div>
+    <div class="row justify-content-center" id="vocabCardContainer">
+      </div>
   </div>
 
-  <!-- 放大卡片 -->
-  <div class="modal-overlay" id="popupOverlay" onclick="closePopup(event)">
-    <div class="card-popup" id="popupContent">
-      <button class="nav-btn nav-prev" onclick="prevCard(event)">&#8592;</button>
-      <div class="vocab-word" id="popupWord">사과</div>
-      <div id="popupRoman">sagwa</div>
-      <div class="text-muted" id="popupMeaning">蘋果</div>
-      <button class="nav-btn nav-next" onclick="nextCard(event)">&#8594;</button>
+  <div class="modal-overlay" id="popupOverlay">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closePopup(event)">&times;</span>
+      <p id="popupWord" class="popup-word"></p>
+      <p id="popupRoman" class="popup-roman"></p>
+      <p id="popupMeaning" class="popup-meaning"></p>
+      <div class="navigation-buttons">
+        <button class="btn btn-secondary" onclick="prevCard(event)">上一張</button>
+        <button class="btn btn-secondary" onclick="nextCard(event)">下一張</button>
+      </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
+  <script type="module" src="./navbar-auth-status.js"></script>
+
+  <script type="module">
+    import { observeUser, getUserData, updateUserCardProgress } from './firebase-auth-utils.js';
+
+    const UNIT_NAME = "單字五"; // <-- **重要**：這是該單元的名稱，用於 Firestore
+    let currentUser = null; // 用於儲存當前登入的用戶
+    let learnedCards = new Set(); // 用於儲存已學習的卡片索引
+
     const vocab = [
-      {
-        word: "사과",
-        roman: "sagwa",
-        meaning: "蘋果"
-      }
+      { word: "감사합니다", roman: "gamsahamnida", meaning: "謝謝" },
       // 之後可加入更多單字
     ];
+    const TOTAL_CARDS = vocab.length; // 總字卡數
 
-    const row = document.querySelector(".row");
-    let currentIndex = 0;
+    // 確保正確獲取 vocabCardContainer
+    const vocabCardContainer = document.getElementById("vocabCardContainer"); 
 
-    vocab.forEach((item, index) => {
-      const div = document.createElement("div");
-      div.className = "col vocab-box";
-      div.textContent = item.word;
-      div.onclick = () => openPopup(index);
-      row.appendChild(div);
-    });
+    // 渲染或重新渲染單字卡
+    function renderVocabCards() {
+      if (!vocabCardContainer) { // 檢查元素是否存在
+          console.error("vocabCardContainer not found!");
+          return;
+      }
+      vocabCardContainer.innerHTML = ''; // 清空現有卡片
+      vocab.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "col-md-3 col-sm-4 col-6 vocab-box"; // 調整網格大小
+        if (learnedCards.has(index)) {
+          div.classList.add("learned"); // 如果已學習，添加 learned class
+        }
+        div.textContent = item.word;
+        div.onclick = () => openPopup(index); // 點擊時呼叫 openPopup
+        vocabCardContainer.appendChild(div);
+      });
+    }
 
-    function openPopup(index) {
+    // 點擊單字卡時，彈出視窗並記錄學習進度
+    let currentIndex = 0; // 將 currentIndex 移到全局範圍
+    // 將函數暴露給全局 window 物件，以便 HTML 中的 onclick 屬性可以調用它們
+    window.openPopup = async (index) => { 
       currentIndex = index;
       const item = vocab[index];
       document.getElementById("popupWord").textContent = item.word;
       document.getElementById("popupRoman").textContent = item.roman;
       document.getElementById("popupMeaning").textContent = item.meaning;
       document.getElementById("popupOverlay").style.display = "flex";
-    }
 
-    function closePopup(e) {
-      if (e.target.id === "popupOverlay") {
+      // 如果用戶已登入，記錄該字卡為已學習
+      if (currentUser) {
+        // 只有在未學習過這張卡片時才更新 Firestore
+        if (!learnedCards.has(index)) {
+          learnedCards.add(index); // 將該卡片索引加入已學習集合
+          // 更新 UI
+          const vocabBox = vocabCardContainer.children[index];
+          if (vocabBox) {
+            vocabBox.classList.add("learned");
+          }
+          // 更新 Firestore
+          try {
+            await updateUserCardProgress(currentUser.uid, UNIT_NAME, index, TOTAL_CARDS);
+            console.log(`單字 ${UNIT_NAME} 的索引 ${index} 已標記為已學習。`);
+          } catch (error) {
+            console.error("更新單字卡進度失敗:", error);
+          }
+        }
+      }
+    };
+
+    window.closePopup = (e) => { 
+      // 確保只有點擊背景或關閉按鈕時才關閉彈窗
+      if (e.target.id === "popupOverlay" || e.target.classList.contains("close-btn")) {
         document.getElementById("popupOverlay").style.display = "none";
       }
-    }
+    };
 
-    function prevCard(e) {
-      e.stopPropagation();
+    window.prevCard = (e) => { 
+      e.stopPropagation(); // 阻止事件冒泡到背景，避免彈窗關閉
       currentIndex = (currentIndex - 1 + vocab.length) % vocab.length;
       openPopup(currentIndex);
-    }
+    };
 
-    function nextCard(e) {
-      e.stopPropagation();
+    window.nextCard = (e) => { 
+      e.stopPropagation(); // 阻止事件冒泡到背景，避免彈窗關閉
       currentIndex = (currentIndex + 1) % vocab.length;
       openPopup(currentIndex);
-    }
+    };
 
+    // 在 DOMContentLoaded 事件監聽器中執行主邏輯
+    document.addEventListener('DOMContentLoaded', () => {
+      // 監聽用戶登入狀態
+      observeUser(async (user) => {
+        currentUser = user; // 儲存當前用戶
+
+        if (user) {
+          // 如果用戶已登入，載入其學習進度
+          const userData = await getUserData(user.uid);
+          if (userData && userData.learnedCards && userData.learnedCards[UNIT_NAME]) {
+            learnedCards = new Set(userData.learnedCards[UNIT_NAME]);
+          }
+        } else {
+          // 如果用戶登出，清空學習進度顯示
+          learnedCards.clear();
+        }
+        renderVocabCards(); // 根據最新的學習進度重新渲染卡片
+      });
+    });
+
+    // 鍵盤事件監聽器 (移到 DOMContentLoaded 之外，確保全局可用)
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        document.getElementById("popupOverlay").style.display = "none";
+      if (document.getElementById("popupOverlay").style.display === "flex") {
+        if (e.key === "ArrowLeft") {
+          prevCard(e);
+        } else if (e.key === "ArrowRight") {
+          nextCard(e);
+        } else if (e.key === "Escape") {
+          closePopup({ target: document.getElementById("popupOverlay") });
+        }
       }
     });
+
   </script>
-  <script type="module" src="./navbar-auth-status.js"></script>
 </body>
 </html>

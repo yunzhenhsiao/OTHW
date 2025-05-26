@@ -17,7 +17,6 @@
     .avatar {
       width: 40px;
       height: 40px;
-      border-radius: 50%;
       object-fit: cover;
     }
   </style>
@@ -66,6 +65,8 @@
       signOut,
       onAuthStateChanged
     } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
+    import { observeUser, updateDisplayNameAndFirestore } from './firebase-auth-utils.js'; // 導入新的函數
+
 
     onAuthStateChanged(auth, (user) => {
       const accountStatus = document.getElementById("accountStatus");
