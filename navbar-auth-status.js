@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 userEmailDisplay.title = "訪客";
                 userEmailDisplay.querySelector('img').alt = "訪客";
             }
-            
+            if (userDisplayNameNav) userDisplayNameNav.textContent = "訪客"; // 確保未登入時也顯示 "訪客"
         }
     });
 
@@ -58,9 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初始化 Bootstrap dropdowns (如果您在其他頁面也使用)
     const dropdownToggleList = document.querySelectorAll('.dropdown-toggle');
-    if (dropdownToggleList.length > 0) {
-        dropdownToggleList.forEach(dropdownToggleEl => {
-            new bootstrap.Dropdown(dropdownToggleEl);
-        });
-    }
+    dropdownToggleList.forEach(dropdownToggle => {
+        new bootstrap.Dropdown(dropdownToggle);
+    });
 });

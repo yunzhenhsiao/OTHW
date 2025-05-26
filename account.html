@@ -23,11 +23,11 @@
     <a class="nav-link" href="lh.html">回單元選擇</a>
 
     <div class="dropdown ms-auto" id="accountDropdown">
-      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" id="userEmailDisplay">
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
         <img src="https://via.placeholder.com/40" class="avatar" alt="User">
-      </a>
+        <span id="userDisplayNameNav">訪客</span> </a>
       <ul class="dropdown-menu dropdown-menu-end">
-        <li><span class="dropdown-item-text" id="accountEmail">載入中...</span></li>
+        <li><span class="dropdown-item-text" id="accountEmail">尚未登入</span></li>
         <li><hr class="dropdown-divider"></li>
         <li><a class="dropdown-item text-primary" href="account.html">帳號狀態</a></li>
         <li><a class="dropdown-item text-danger" href="#" id="logoutBtn" style="display: none;">登出</a></li>
@@ -39,16 +39,8 @@
   <div class="container py-5">
     <h2 class="text-center mb-4">帳號狀態</h2>
 
-    <div class="mb-4">
-      <h5>登入帳號：<span id="userEmail">載入中...</span></h5>
-    </div>
-
-    <div class="mb-4">
-      <h5>登入帳號：<span id="userEmail">載入中...</span></h5>
-    </div>
-
     <div class="card p-4 mb-4 shadow-sm">
-      <h4 class="card-title">👤 用戶名</h4>
+      <h4 class="card-title">👤 用戶名設定</h4>
       <div class="d-flex align-items-center mb-3">
         <strong class="me-2">當前用戶名：</strong>
         <span id="currentDisplayName">載入中...</span>
@@ -59,11 +51,10 @@
       </div>
       <small id="displayNameFeedback" class="text-muted"></small>
     </div>
-    <div class="section-title">
-      <h4>📘 學習進度</h4>
-      <ul class="list-group" id="progressList">
-        </ul>
+    <div class="mb-4">
+      <h5>登入帳號：<span id="userEmail">載入中...</span></h5>
     </div>
+
 
     <div class="section-title">
       <h4>📘 學習進度</h4>
@@ -72,20 +63,17 @@
     </div>
 
     <div class="section-title">
-      <h4>🏆 測驗進度</h4>
-      <div class="row g-3" id="quizBadgeGrid">
+      <h4>🏆 測驗徽章</h4>
+      <div class="row row-cols-1 row-cols-md-2 g-4" id="badgeGrid">
         </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-  <script type="module" src="./navbar-auth-status.js"></script>
-
   <script type="module">
     import { auth, db } from './firebase-init.js';
     import { onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js';
-    import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
+    import { doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js';
     import { observeUser, updateDisplayNameAndFirestore } from './firebase-auth-utils.js'; // 導入新的函數
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -146,7 +134,7 @@
                 <div class="card text-center border-${passed ? 'success' : 'secondary'}">
                   <div class="card-body">
                     <h6 class="card-title">${unit}</h6>
-                    <p class="card-text">
+                    <p class="card-text card-text-quiz">
                       ${passed ? '✅ 測驗通過' : '❌ 尚未通過'}
                     </p>
                   </div>
@@ -182,6 +170,17 @@
             currentDisplayName.textContent = newDisplayName;
             displayNameFeedback.textContent = "用戶名更新成功！";
             displayNameFeedback.className = "text-success";
+            // 由於用戶名可能在導覽列顯示，所以更新後重新載入 navbar-auth-status
+            // 簡單的方法是刷新頁面，但更平滑的體驗是直接更新導覽列的顯示
+            // 這裡我們直接呼叫 observeUser 讓導覽列監聽器重新觸發
+            observeUser((updatedUser) => {
+                if (updatedUser) {
+                    const userDisplayNameNav = document.getElementById("userDisplayNameNav");
+                    if (userDisplayNameNav) {
+                        userDisplayNameNav.textContent = updatedUser.displayName || updatedUser.email;
+                    }
+                }
+            });
           } catch (error) {
             console.error("更新用戶名失敗:", error);
             displayNameFeedback.textContent = "更新用戶名失敗：" + error.message;
@@ -194,5 +193,6 @@
       });
     });
   </script>
+  <script type="module" src="./navbar-auth-status.js"></script>
 </body>
 </html>
