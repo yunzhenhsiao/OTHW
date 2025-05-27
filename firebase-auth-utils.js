@@ -159,3 +159,33 @@ export async function updateDisplayName(uid, newDisplayName) { // <-- 新增這�
     throw error;
   }
 }
+/**
+ * 更新使用者的測驗分數到 Firestore。
+ * @param {string} userId 使用者的 UID。
+ * @param {string} unit 單元的識別符 (例如 "unit1", "unit2")。
+ * @param {number} score 該單元的測驗分數。
+ * @param {number} totalQuestions 該單元的總題數。
+ */
+export async function updateQuizScore(userId, unit, score, totalQuestions) {
+  const userRef = doc(db, "users", userId);
+  try {
+    const docSnap = await getDoc(userRef);
+    let quizResults = {};
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      quizResults = userData.quizResults || {}; // 確保 quizResults 是一個物件
+    }
+
+    // 只在分數比上次高的時候才更新，或者如果之前沒有記錄，則進行更新
+    if (!quizResults[unit] || score > (quizResults[unit].score || 0)) { // 確保上次分數存在
+      quizResults[unit] = { score: score, total: totalQuestions };
+      await updateDoc(userRef, { quizResults: quizResults });
+      console.log(`用戶 ${userId} 的單元 ${unit} 測驗狀態更新成功！分數: ${score}/${totalQuestions}`);
+    } else {
+      console.log(`用戶 ${userId} 的單元 ${unit} 測驗分數 (${score}) 沒有比上次高 (${quizResults[unit].score || 0})，不更新。`);
+    }
+  } catch (error) {
+    console.error("更新測驗狀態失敗：", error);
+    throw error; // 重新拋出錯誤以便調用者處理
+  }
+}

@@ -99,13 +99,13 @@
       <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" id="userEmailDisplay">
         <img src="https://via.placeholder.com/40" class="avatar" alt="User">
       </a>
-      <ul class="dropdown-menu dropdown-menu-end">
-        <li><span class="dropdown-item-text" id="accountEmail">尚未登入</span></li>
-        <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item text-primary" href="account.html">帳號狀態</a></li>
-        <li><a class="dropdown-item text-danger" href="#" id="logoutBtn" style="display: none;">登出</a></li>
-        <li><a class="dropdown-item" href="login.html" id="loginLink">登入 / 註冊</a></li>
-      </ul>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="v1t.html">單字一測驗</a></li>
+        <li><a class="dropdown-item" href="v2t.html">單字二測驗</a></li>
+        <li><a class="dropdown-item" href="v3t.html">單字三測驗</a></li>
+        <li><a class="dropdown-item" href="v4t.html">單字四測驗</a></li>
+        <li><a class="dropdown-item" href="v5t.html">單字五測驗</a></li>
+        </ul>
     </div>
   </nav>
 
@@ -140,7 +140,46 @@
     let learnedCards = new Set(); // 用於儲存已學習的卡片索引
 
     const vocab = [
-      { word: "감사합니다", roman: "gamsahamnida", meaning: "謝謝" },
+      { word: "감", roman: "gam", meaning: "柿子" },
+      { word: "귤", roman: "gyul", meaning: "橘子" },
+      { word: "딸기", roman: "ttalgi", meaning: "草莓" },
+      { word: "바나나", roman: "banana", meaning: "香蕉" },
+      { word: "사과", roman: "sagwa", meaning: "蘋果" },
+      { word: "포도", roman: "podo", meaning: "葡萄" },
+      { word: "오렌지", roman: "orenji", meaning: "柳丁" },
+      { word: "수박", roman: "subak", meaning: "西瓜" },
+      { word: "배", roman: "bae", meaning: "水梨" },
+      { word: "복숭아", roman: "boksunga", meaning: "桃子" },
+      { word: "멜론", roman: "mellon", meaning: "哈密瓜" },
+      { word: "체리", roman: "cheri", meaning: "櫻桃" },
+      { word: "망고", roman: "manggo", meaning: "芒果" },
+      { word: "애호박", roman: "aehobak", meaning: "櫛瓜" },
+      { word: "양파", roman: "yangpa", meaning: "洋蔥" },
+      { word: "대파", roman: "daepa", meaning: "蔥" },
+      { word: "고추", roman: "gochu", meaning: "辣椒" },
+      { word: "감자", roman: "gamja", meaning: "馬鈴薯" },
+      { word: "고구마", roman: "goguma", meaning: "地瓜" },
+      { word: "당근", roman: "danggeun", meaning: "紅蘿蔔" },
+      { word: "마늘", roman: "maneul", meaning: "蒜頭" },
+      { word: "무", roman: "mu", meaning: "白蘿蔔" },
+      { word: "오이", roman: "oi", meaning: "小黃瓜" },
+      { word: "양배추", roman: "yangbaechu", meaning: "高麗菜" },
+      { word: "배추", roman: "baechu", meaning: "大白菜" },
+      { word: "버섯", roman: "beoseot", meaning: "香菇" },
+      { word: "토마토", roman: "tomato", meaning: "番茄" },
+      { word: "시금치", roman: "sigeumchi", meaning: "菠菜" },
+      { word: "숙주", roman: "sukju", meaning: "豆芽菜" },
+      { word: "떡볶이", roman: "tteokbokki", meaning: "辣炒年糕" },
+      { word: "김치찌개", roman: "gimchijjigae", meaning: "泡菜鍋" },
+      { word: "된장찌개", roman: "doenjangjjigae", meaning: "大醬湯" },
+      { word: "순두부찌개", roman: "sundubujjigae", meaning: "嫩豆腐湯" },
+      { word: "부대찌개", roman: "budaessigae", meaning: "部隊鍋" },
+      { word: "김밥", roman: "gimbap", meaning: "紫菜包飯" },
+      { word: "라면", roman: "ramyeon", meaning: "泡麵" },
+      { word: "국밥", roman: "gukbap", meaning: "湯泡飯" },
+      { word: "해물전", roman: "haemuljeon", meaning: "海鮮煎餅" },
+      { word: "김치전", roman: "gimchijeon", meaning: "泡菜煎餅" },
+      { word: "물냉면", roman: "mullaengmyeon", meaning: "水冷麵" },
       // 之後可加入更多單字
     ];
     const TOTAL_CARDS = vocab.length; // 總字卡數

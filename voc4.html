@@ -87,12 +87,12 @@
         單字測驗
       </a>
       <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="#">單元一測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元二測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元三測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元四測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元五測驗</a></li>
-      </ul>
+        <li><a class="dropdown-item" href="v1t.html">單字一測驗</a></li>
+        <li><a class="dropdown-item" href="v2t.html">單字二測驗</a></li>
+        <li><a class="dropdown-item" href="v3t.html">單字三測驗</a></li>
+        <li><a class="dropdown-item" href="v4t.html">單字四測驗</a></li>
+        <li><a class="dropdown-item" href="v5t.html">單字五測驗</a></li>
+        </ul>
     </div>
 
     <div class="dropdown ms-auto" id="accountDropdown">
@@ -140,7 +140,46 @@
     let learnedCards = new Set(); // 用於儲存已學習的卡片索引
 
     const vocab = [
-      { word: "감사합니다", roman: "gamsahamnida", meaning: "謝謝" },
+      { word: "비빔냉면", roman: "bibimnaengmyeon", meaning: "拌冷麵" },
+      { word: "떡국", roman: "tteokguk", meaning: "年糕湯" },
+      { word: "삼계탕", roman: "samgyetang", meaning: "蔘雞湯" },
+      { word: "설렁탕", roman: "seolleongtang", meaning: "雪濃湯" },
+      { word: "만두", roman: "mandu", meaning: "餃子" },
+      { word: "자장면", roman: "jajangmyeon", meaning: "炸醬麵" },
+      { word: "짬뽕", roman: "jjamppong", meaning: "炒碼麵" },
+      { word: "탕수육", roman: "tangsuyuk", meaning: "糖醋肉" },
+      { word: "불고기", roman: "bulgogi", meaning: "烤牛肉" },
+      { word: "삼겹살", roman: "samgyeopsal", meaning: "五花肉" },
+      { word: "비빔밥", roman: "bibimbap", meaning: "拌飯" },
+      { word: "산낙지", roman: "sannakji", meaning: "活章魚" },
+      { word: "볶음밥", roman: "bokkeumbap", meaning: "炒飯" },
+      { word: "닭갈비", roman: "dakgalbi", meaning: "辣炒雞" },
+      { word: "치킨", roman: "chikin", meaning: "炸雞" },
+      { word: "아메리카노", roman: "amerikano", meaning: "美式咖啡" },
+      { word: "카페라떼", roman: "kape latte", meaning: "拿鐵" },
+      { word: "카푸치노", roman: "kapuchino", meaning: "卡布奇諾" },
+      { word: "녹차", roman: "nokcha", meaning: "綠茶" },
+      { word: "홍차", roman: "hongcha", meaning: "紅茶" },
+      { word: "밀크티", roman: "milkeuti", meaning: "奶茶" },
+      { word: "주스", roman: "juseu", meaning: "果汁" },
+      { word: "아이스크림", roman: "aiseukeurim", meaning: "冰淇淋" },
+      { word: "케이크", roman: "keikeu", meaning: "蛋糕" },
+      { word: "콜라", roman: "kolla", meaning: "可樂" },
+      { word: "우유", roman: "uyu", meaning: "牛奶" },
+      { word: "빵", roman: "ppang", meaning: "麵包" },
+      { word: "샌드위치", roman: "saendeuwichi", meaning: "三明治" },
+      { word: "피자", roman: "pija", meaning: "披薩" },
+      { word: "맥주", roman: "maekju", meaning: "啤酒" },
+      { word: "과자", roman: "gwaja", meaning: "餅乾" },
+      { word: "자동차", roman: "jadongcha", meaning: "車" },
+      { word: "자전거", roman: "jajeongeo", meaning: "腳踏車" },
+      { word: "비행기", roman: "bihaenggi", meaning: "飛機" },
+      { word: "택시", roman: "taeksi", meaning: "計程車" },
+      { word: "배", roman: "bae", meaning: "船" },
+      { word: "버스", roman: "beoseu", meaning: "公車" },
+      { word: "기차", roman: "gicha", meaning: "火車" },
+      { word: "지하철", roman: "jihacheol", meaning: "捷運" },
+      { word: "신호등", roman: "sinhodeung", meaning: "紅綠燈" },
       // 之後可加入更多單字
     ];
     const TOTAL_CARDS = vocab.length; // 總字卡數

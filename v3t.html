@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>單元三測驗 - 韓文學習網</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      padding-top: 56px; /* Adjust for fixed navbar */
+      background-color: #f8f9fa; /* Light grey background */
+    }
+    .option-btn {
+      margin: 10px;
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      width: 100%; /* Make buttons full width in smaller screens */
+      max-width: 250px; /* Limit button width on larger screens */
+      white-space: normal; /* Allow text to wrap */
+      word-wrap: break-word; /* Break long words */
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+    }
+    .feedback {
+      font-size: 1.2rem;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .quiz-box {
+      max-width: 600px; /* Slightly wider for longer words/meanings */
+      margin: auto;
+      padding: 20px;
+      border-radius: 8px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    #questionDisplay {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #343a40;
+    }
+    #progress-bar-container {
+      width: 100%;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      margin-top: 20px;
+      height: 10px;
+    }
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      border-radius: 5px;
+      transition: width 0.3s ease-in-out;
+    }
+    .result-message {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4 fixed-top">
+    <a class="navbar-brand" href="fp.html">韓文學習網</a>
+    <a class="nav-link" href="voc.html">回單字單元選擇</a>
+    <div class="dropdown ms-3">
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+        單字測驗
+      </a>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="v1t.html">單字一測驗</a></li>
+        <li><a class="dropdown-item" href="v2t.html">單字二測驗</a></li>
+        <li><a class="dropdown-item" href="v3t.html">單字三測驗</a></li>
+        <li><a class="dropdown-item" href="v4t.html">單字四測驗</a></li>
+        <li><a class="dropdown-item" href="v5t.html">單字五測驗</a></li>
+        </ul>
+    </div>
+
+    <div class="dropdown ms-auto" id="accountDropdown">
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" id="userEmailDisplay">
+        <img src="https://via.placeholder.com/40" class="avatar" alt="User">
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><span class="dropdown-item-text" id="accountEmail">尚未登入</span></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item text-primary" href="account.html">帳號狀態</a></li>
+        <li><a class="dropdown-item text-danger" href="#" id="logoutBtn" style="display: none;">登出</a></li>
+        <li><a class="dropdown-item" href="login.html" id="loginLink">登入 / 註冊</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container text-center mt-5">
+    <h2 class="mb-4">單字三測驗</h2>
+
+    <div class="quiz-box shadow">
+      <h4 id="questionDisplay"></h4>
+      <div id="optionsBox" class="d-flex flex-wrap justify-content-center">
+        </div>
+      <p id="feedback" class="feedback text-danger"></p>
+      <div id="progress-bar-container">
+        <div id="progress-bar"></div>
+      </div>
+      <p class="mt-2 text-muted" id="questionCounter">題號：0 / 0</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="./firebase-init.js"></script>
+  <script type="module" src="./firebase-auth-utils.js"></script>
+  <script type="module" src="./navbar-auth-status.js"></script>
+
+  <script type="module">
+    // 導入測驗邏輯函數
+    import { initializeQuiz } from './quiz-logic.js';
+
+    // 單元三的單字資料
+    const vocabUnit3 = [
+      { word: "감", meaning: "柿子", options: ["柿子", "橘子", "草莓", "香蕉"] },
+      { word: "귤", meaning: "橘子", options: ["橘子", "柿子", "草莓", "香蕉"] },
+      { word: "딸기", meaning: "草莓", options: ["草莓", "柿子", "橘子", "香蕉"] },
+      { word: "바나나", meaning: "香蕉", options: ["香蕉", "柿子", "橘子", "草莓"] },
+      { word: "사과", meaning: "蘋果", options: ["蘋果", "葡萄", "柳丁", "西瓜"] },
+      { word: "포도", meaning: "葡萄", options: ["葡萄", "蘋果", "柳丁", "西瓜"] },
+      { word: "오렌지", meaning: "柳丁", options: ["柳丁", "蘋果", "葡萄", "西瓜"] },
+      { word: "수박", meaning: "西瓜", options: ["西瓜", "蘋果", "葡萄", "柳丁"] },
+      { word: "배", meaning: "水梨", options: ["水梨", "桃子", "哈密瓜", "櫻桃"] },
+      { word: "복숭아", meaning: "桃子", options: ["桃子", "水梨", "哈密瓜", "櫻桃"] },
+      { word: "멜론", meaning: "哈密瓜", options: ["哈密瓜", "水梨", "桃子", "櫻桃"] },
+      { word: "체리", meaning: "櫻桃", options: ["櫻桃", "水梨", "桃子", "哈密瓜"] },
+      { word: "망고", meaning: "芒果", options: ["芒果", "櫛瓜", "洋蔥", "蔥"] },
+      { word: "애호박", meaning: "櫛瓜", options: ["櫛瓜", "芒果", "洋蔥", "蔥"] },
+      { word: "양파", meaning: "洋蔥", options: ["洋蔥", "芒果", "櫛瓜", "蔥"] },
+      { word: "대파", meaning: "蔥", options: ["蔥", "芒果", "櫛瓜", "洋蔥"] },
+      { word: "고추", meaning: "辣椒", options: ["辣椒", "馬鈴薯", "地瓜", "紅蘿蔔"] },
+      { word: "감자", meaning: "馬鈴薯", options: ["馬鈴薯", "辣椒", "地瓜", "紅蘿蔔"] },
+      { word: "高구마", meaning: "地瓜", options: ["地瓜", "辣椒", "馬鈴薯", "紅蘿蔔"] },
+      { word: "당근", meaning: "紅蘿蔔", options: ["紅蘿蔔", "辣椒", "馬鈴薯", "地瓜"] },
+      { word: "마늘", meaning: "蒜頭", options: ["蒜頭", "白蘿蔔", "小黃瓜", "高麗菜"] },
+      { word: "무", meaning: "白蘿蔔", options: ["白蘿蔔", "蒜頭", "小黃瓜", "高麗菜"] },
+      { word: "오이", meaning: "小黃瓜", options: ["小黃瓜", "蒜頭", "白蘿蔔", "高麗菜"] },
+      { word: "양배추", meaning: "高麗菜", options: ["高麗菜", "蒜頭", "白蘿蔔", "小黃瓜"] },
+      { word: "배추", meaning: "大白菜", options: ["大白菜", "香菇", "番茄", "菠菜"] },
+      { word: "버섯", meaning: "香菇", options: ["香菇", "大白菜", "番茄", "菠菜"] },
+      { word: "토마토", meaning: "番茄", options: ["番茄", "大白菜", "香菇", "菠菜"] },
+      { word: "시금치", meaning: "菠菜", options: ["菠菜", "大白菜", "香菇", "番茄"] },
+      { word: "숙주", meaning: "豆芽菜", options: ["豆芽菜", "辣炒年糕", "泡菜鍋", "大醬湯"] },
+      { word: "떡볶이", meaning: "辣炒年糕", options: ["辣炒年糕", "豆芽菜", "泡菜鍋", "大醬湯"] },
+      { word: "김치찌개", meaning: "泡菜鍋", options: ["泡菜鍋", "豆芽菜", "辣炒年糕", "大醬湯"] },
+      { word: "된장찌개", meaning: "大醬湯", options: ["大醬湯", "豆芽菜", "辣炒年糕", "泡菜鍋"] },
+      { word: "순두부찌개", meaning: "嫩豆腐湯", options: ["嫩豆腐湯", "部隊鍋", "紫菜包飯", "泡麵"] },
+      { word: "부대찌개", meaning: "部隊鍋", options: ["部隊鍋", "嫩豆腐湯", "紫菜包飯", "泡麵"] },
+      { word: "김밥", meaning: "紫菜包飯", options: ["紫菜包飯", "嫩豆腐湯", "部隊鍋", "泡麵"] },
+      { word: "라면", meaning: "泡麵", options: ["泡麵", "嫩豆腐湯", "部隊鍋", "紫菜包飯"] },
+      { word: "국밥", meaning: "湯泡飯", options: ["湯泡飯", "海鮮煎餅", "泡菜煎餅", "水冷麵"] },
+      { word: "해물전", meaning: "海鮮煎餅", options: ["海鮮煎餅", "湯泡飯", "泡菜煎餅", "水冷麵"] },
+      { word: "김치전", meaning: "泡菜煎餅", options: ["泡菜煎餅", "湯泡飯", "海鮮煎餅", "水冷麵"] },
+      { word: "물냉면", meaning: "水冷麵", options: ["水冷麵", "湯泡飯", "海鮮煎餅", "泡菜煎餅"] },
+    ];
+
+    // 初始化單元三測驗
+    initializeQuiz(vocabUnit3, "unit3");
+  </script>
+</body>
+</html>

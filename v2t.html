@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>單元二測驗 - 韓文學習網</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      padding-top: 56px; /* Adjust for fixed navbar */
+      background-color: #f8f9fa; /* Light grey background */
+    }
+    .option-btn {
+      margin: 10px;
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      width: 100%; /* Make buttons full width in smaller screens */
+      max-width: 250px; /* Limit button width on larger screens */
+      white-space: normal; /* Allow text to wrap */
+      word-wrap: break-word; /* Break long words */
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+    }
+    .feedback {
+      font-size: 1.2rem;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .quiz-box {
+      max-width: 600px; /* Slightly wider for longer words/meanings */
+      margin: auto;
+      padding: 20px;
+      border-radius: 8px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    #questionDisplay {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #343a40;
+    }
+    #progress-bar-container {
+      width: 100%;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      margin-top: 20px;
+      height: 10px;
+    }
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      border-radius: 5px;
+      transition: width 0.3s ease-in-out;
+    }
+    .result-message {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4 fixed-top">
+    <a class="navbar-brand" href="fp.html">韓文學習網</a>
+    <a class="nav-link" href="voc.html">回單字單元選擇</a>
+    <div class="dropdown ms-3">
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+        單字測驗
+      </a>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="v1t.html">單字一測驗</a></li>
+        <li><a class="dropdown-item" href="v2t.html">單字二測驗</a></li>
+        <li><a class="dropdown-item" href="v3t.html">單字三測驗</a></li>
+        <li><a class="dropdown-item" href="v4t.html">單字四測驗</a></li>
+        <li><a class="dropdown-item" href="v5t.html">單字五測驗</a></li>
+        </ul>
+    </div>
+
+    <div class="dropdown ms-auto" id="accountDropdown">
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" id="userEmailDisplay">
+        <img src="https://via.placeholder.com/40" class="avatar" alt="User">
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><span class="dropdown-item-text" id="accountEmail">尚未登入</span></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item text-primary" href="account.html">帳號狀態</a></li>
+        <li><a class="dropdown-item text-danger" href="#" id="logoutBtn" style="display: none;">登出</a></li>
+        <li><a class="dropdown-item" href="login.html" id="loginLink">登入 / 註冊</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container text-center mt-5">
+    <h2 class="mb-4">單字二測驗</h2>
+
+    <div class="quiz-box shadow">
+      <h4 id="questionDisplay"></h4>
+      <div id="optionsBox" class="d-flex flex-wrap justify-content-center">
+        </div>
+      <p id="feedback" class="feedback text-danger"></p>
+      <div id="progress-bar-container">
+        <div id="progress-bar"></div>
+      </div>
+      <p class="mt-2 text-muted" id="questionCounter">題號：0 / 0</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="./firebase-init.js"></script>
+  <script type="module" src="./firebase-auth-utils.js"></script>
+  <script type="module" src="./navbar-auth-status.js"></script>
+
+  <script type="module">
+    // 導入測驗邏輯函數
+    import { initializeQuiz } from './quiz-logic.js';
+
+    // 單元二的單字資料
+    const vocabUnit2 = [
+      { word: "약국", meaning: "藥局", options: ["藥局", "醫院", "美髮院", "房仲"] },
+      { word: "병원", meaning: "醫院", options: ["醫院", "藥局", "美髮院", "房仲"] },
+      { word: "미용실", meaning: "美髮院", options: ["美髮院", "藥局", "醫院", "房仲"] },
+      { word: "부동산", meaning: "房仲", options: ["房仲", "藥局", "醫院", "美髮院"] },
+      { word: "기숙사", meaning: "宿舍", options: ["宿舍", "圖書館", "書局", "學校"] },
+      { word: "도서관", meaning: "圖書館", options: ["圖書館", "宿舍", "書局", "學校"] },
+      { word: "서점", meaning: "書局", options: ["書局", "宿舍", "圖書館", "學校"] },
+      { word: "학교", meaning: "學校", options: ["學校", "宿舍", "圖書館", "書局"] },
+      { word: "호텔", meaning: "飯店", options: ["飯店", "美術館", "博物館", "電影院"] },
+      { word: "미술관", meaning: "美術館", options: ["美術館", "飯店", "博物館", "電影院"] },
+      { word: "박물관", meaning: "博物館", options: ["博物館", "飯店", "美術館", "電影院"] },
+      { word: "영화관", meaning: "電影院", options: ["電影院", "飯店", "美術館", "博物館"] },
+      { word: "백화점", meaning: "百貨公司", options: ["百貨公司", "大使館", "藥局", "醫院"] },
+      { word: "대사관", meaning: "大使館", options: ["大使館", "百貨公司", "藥局", "醫院"] },
+      { word: "가방", meaning: "包包", options: ["包包", "錢包", "錢", "相機"] },
+      { word: "지갑", meaning: "錢包", options: ["錢包", "包包", "錢", "相機"] },
+      { word: "돈", meaning: "錢", options: ["錢", "包包", "錢包", "相機"] },
+      { word: "카메라", meaning: "相機", options: ["相機", "包包", "錢包", "錢"] },
+      { word: "핸드폰", meaning: "手機", options: ["手機", "電腦", "字典", "書"] },
+      { word: "컴퓨터", meaning: "電腦", options: ["電腦", "手機", "字典", "書"] },
+      { word: "사전", meaning: "字典", options: ["字典", "手機", "電腦", "書"] },
+      { word: "책", meaning: "書", options: ["書", "手機", "電腦", "字典"] },
+      { word: "공책", meaning: "筆記本", options: ["筆記本", "雜誌", "小說", "漫畫"] },
+      { word: "잡지", meaning: "雜誌", options: ["雜誌", "筆記本", "小說", "漫畫"] },
+      { word: "소설책", meaning: "小說", options: ["小說", "筆記本", "雜誌", "漫畫"] },
+      { word: "만화책", meaning: "漫畫", options: ["漫畫", "筆記本", "雜誌", "小說"] },
+      { word: "신문", meaning: "報紙", options: ["報紙", "剪刀", "鉛筆", "原子筆"] },
+      { word: "가위", meaning: "剪刀", options: ["剪刀", "報紙", "鉛筆", "原子筆"] },
+      { word: "연필", meaning: "鉛筆", options: ["鉛筆", "報紙", "剪刀", "原子筆"] },
+      { word: "볼펜", meaning: "原子筆", options: ["原子筆", "報紙", "剪刀", "鉛筆"] },
+      { word: "지우개", meaning: "橡皮擦", options: ["橡皮擦", "立可帶", "鉛筆盒", "書桌"] },
+      { word: "수정 테이프", meaning: "立可帶", options: ["立可帶", "橡皮擦", "鉛筆盒", "書桌"] },
+      { word: "필통", meaning: "鉛筆盒", options: ["鉛筆盒", "橡皮擦", "立可帶", "書桌"] },
+      { word: "책상", meaning: "書桌", options: ["書桌", "橡皮擦", "立可帶", "鉛筆盒"] },
+      { word: "칠판", meaning: "黑板", options: ["黑板", "鑰匙", "眼鏡", "時鐘"] },
+      { word: "열쇠", meaning: "鑰匙", options: ["鑰匙", "黑板", "眼鏡", "時鐘"] },
+      { word: "안경", meaning: "眼鏡", options: ["眼鏡", "黑板", "鑰匙", "時鐘"] },
+      { word: "시계", meaning: "時鐘", options: ["時鐘", "黑板", "鑰匙", "眼鏡"] },
+      { word: "지도", meaning: "地圖", options: ["地圖", "電視", "醫院", "藥局"] },
+      { word: "텔레비전", meaning: "電視", options: ["電視", "地圖", "醫院", "藥局"] },
+    ];
+
+    // 初始化單元二測驗
+    initializeQuiz(vocabUnit2, "unit2");
+  </script>
+</body>
+</html>

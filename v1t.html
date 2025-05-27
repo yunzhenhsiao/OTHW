@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>單元一測驗 - 韓文學習網</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      padding-top: 56px; /* Adjust for fixed navbar */
+    }
+    .option-btn {
+      margin: 10px;
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      width: 100%; /* Make buttons full width in smaller screens */
+      max-width: 250px; /* Limit button width on larger screens */
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+    }
+    .feedback {
+      font-size: 1.2rem;
+      margin-top: 20px;
+    }
+    .quiz-box {
+      max-width: 600px; /* Slightly wider for longer words/meanings */
+      margin: auto;
+      padding: 20px;
+      border-radius: 8px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    #progress-bar-container {
+      width: 100%;
+      background-color: #e0e0e0;
+      border-radius: 5px;
+      height: 15px;
+      margin-top: 20px;
+    }
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background-color: #0d6efd; /* Bootstrap primary color */
+      border-radius: 5px;
+      transition: width 0.5s ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4 fixed-top">
+    <a class="navbar-brand" href="fp.html">韓文學習網</a>
+    <a class="nav-link" href="voc.html">回單字單元選擇</a>
+    <div class="dropdown ms-3">
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+        單字測驗
+      </a>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="v1t.html">單字一測驗</a></li>
+        <li><a class="dropdown-item" href="v2t.html">單字二測驗</a></li>
+        <li><a class="dropdown-item" href="v3t.html">單字三測驗</a></li>
+        <li><a class="dropdown-item" href="v4t.html">單字四測驗</a></li>
+        <li><a class="dropdown-item" href="v5t.html">單字五測驗</a></li>
+        </ul>
+    </div>
+
+    <div class="dropdown ms-auto" id="accountDropdown">
+      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" id="userEmailDisplay">
+        <img src="https://via.placeholder.com/40" class="avatar" alt="User">
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><span class="dropdown-item-text" id="accountEmail">尚未登入</span></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item text-primary" href="account.html">帳號狀態</a></li>
+        <li><a class="dropdown-item text-danger" href="#" id="logoutBtn" style="display: none;">登出</a></li>
+        <li><a class="dropdown-item" href="login.html" id="loginLink">登入 / 註冊</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container text-center mt-5">
+    <div class="quiz-box bg-white p-4 rounded shadow-sm">
+      <h2 class="mb-4">單字一測驗</h2>
+      <div id="quizContainer">
+        <h4 id="questionDisplay"></h4>
+        <div id="optionsBox" class="d-flex flex-wrap justify-content-center">
+          </div>
+        <p id="feedback" class="feedback text-danger"></p>
+        <div id="progress-bar-container">
+          <div id="progress-bar"></div>
+        </div>
+        <p class="mt-2 text-muted" id="questionCounter">題號：0 / 0</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="./navbar-auth-status.js"></script>
+  <script type="module">
+    import { initializeQuiz } from './quiz-logic.js';
+
+    // 單元一的單字資料
+    const vocabUnit1 = [
+        { word: "안녕하세요", meaning: "您好", options: ["您好", "再見", "謝謝", "對不起"] },
+        { word: "만나서 반가워요", meaning: "很高興認識您", options: ["很高興認識您", "您好", "謝謝", "請多多指教"] },
+        { word: "잘 부탁드려요", meaning: "請多多指教", options: ["請多多指教", "很高興認識您", "謝謝", "請慢走"] },
+        { word: "안녕히 가세요", meaning: "請慢走", options: ["請慢走", "請留步", "再見", "您好"] },
+        { word: "안녕히 계세요", meaning: "請留步", options: ["請留步", "請慢走", "謝謝", "對不起"] },
+        { word: "감사합니다", meaning: "謝謝（偏正式）", options: ["謝謝（偏正式）", "謝謝（偏口語）", "對不起", "是的"] },
+        { word: "고마워요", meaning: "謝謝（偏口語）", options: ["謝謝（偏口語）", "謝謝（偏正式）", "對不起", "不是"] },
+        { word: "잘 자요", meaning: "晚安", options: ["晚安", "您好", "謝謝", "對不起"] },
+        { word: "안녕히 주무세요", meaning: "晚安（對長輩）", options: ["晚安（對長輩）", "晚安", "謝謝", "對不起"] },
+        { word: "가수", meaning: "歌手", options: ["歌手", "護理人員", "警察", "軍人"] },
+        { word: "간호사", meaning: "護理人員", options: ["護理人員", "歌手", "警察", "軍人"] },
+        { word: "경찰", meaning: "警察", options: ["警察", "歌手", "護理人員", "軍人"] },
+        { word: "군인", meaning: "軍人", options: ["軍人", "歌手", "護理人員", "警察"] },
+        { word: "운전기사", meaning: "司機", options: ["司機", "記者", "模特", "律師"] },
+        { word: "기자", meaning: "記者", options: ["記者", "司機", "模特", "律師"] },
+        { word: "모델", meaning: "模特", options: ["模特", "司機", "記者", "律師"] },
+        { word: "변호사", meaning: "律師", options: ["律師", "司機", "記者", "模特"] },
+        { word: "학생", meaning: "學生", options: ["學生", "演員", "運動選手", "上班族"] },
+        { word: "배우", meaning: "演員", options: ["演員", "學生", "運動選手", "上班族"] },
+        { word: "운동선수", meaning: "運動選手", options: ["運動選手", "學生", "演員", "上班族"] },
+        { word: "회사원", meaning: "上班族", options: ["上班族", "學生", "演員", "運動選手"] },
+        { word: "요리사", meaning: "廚師", options: ["廚師", "銀行員", "攝影師", "家庭主婦"] },
+        { word: "은행원", meaning: "銀行員", options: ["銀行員", "廚師", "攝影師", "家庭主婦"] },
+        { word: "사진작가", meaning: "攝影師", options: ["攝影師", "廚師", "銀行員", "家庭主婦"] },
+        { word: "주부", meaning: "家庭主婦", options: ["家庭主婦", "廚師", "銀行員", "攝影師"] },
+        { word: "집", meaning: "家", options: ["家", "房間", "市場", "餐廳"] },
+        { word: "방", meaning: "房間", options: ["房間", "家", "市場", "餐廳"] },
+        { word: "시장", meaning: "市場", options: ["市場", "家", "房間", "餐廳"] },
+        { word: "식당", meaning: "餐廳", options: ["餐廳", "家", "房間", "市場"] },
+        { word: "카페/커피숍", meaning: "咖啡廳", options: ["咖啡廳", "超級市場", "KTV", "銀行"] },
+        { word: "슈퍼마켓", meaning: "超級市場", options: ["超級市場", "咖啡廳", "KTV", "銀行"] },
+        { word: "노래방", meaning: "KTV", options: ["KTV", "咖啡廳", "超級市場", "銀行"] },
+        { word: "은행", meaning: "銀行", options: ["銀行", "咖啡廳", "超級市場", "KTV"] },
+        { word: "경찰서", meaning: "警察局", options: ["警察局", "郵局", "洗衣店", "公園"] },
+        { word: "우체국", meaning: "郵局", options: ["郵局", "警察局", "洗衣店", "公園"] },
+        { word: "세탁소", meaning: "洗衣店", options: ["洗衣店", "警察局", "郵局", "公園"] },
+        { word: "공원", meaning: "公園", options: ["公園", "警察局", "郵局", "洗衣店"] },
+        { word: "회사", meaning: "公司", options: ["公司", "辦公室", "教室", "家"] },
+        { word: "사무실", meaning: "辦公室", options: ["辦公室", "公司", "教室", "家"] },
+        { word: "교실", meaning: "教室", options: ["教室", "公司", "辦公室", "家"] },
+      // 您可以在這裡加入更多單元一的單字，格式與上方一致
+      // 例如：
+      // { word: "학생", meaning: "學生", options: ["老師", "學生", "朋友", "醫生"] },
+      // { word: "학교", meaning: "學校", options: ["家", "學校", "公司", "商店"] },
+    ];
+
+    // 初始化單元一測驗
+    // "unit1" 是用於 Firebase 記錄進度的識別符
+    initializeQuiz(vocabUnit1, "unit1");
+  </script>
+</body>
+</html>

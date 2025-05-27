@@ -87,12 +87,12 @@
         單字測驗
       </a>
       <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="#">單元一測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元二測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元三測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元四測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元五測驗</a></li>
-      </ul>
+        <li><a class="dropdown-item" href="v1t.html">單字一測驗</a></li>
+        <li><a class="dropdown-item" href="v2t.html">單字二測驗</a></li>
+        <li><a class="dropdown-item" href="v3t.html">單字三測驗</a></li>
+        <li><a class="dropdown-item" href="v4t.html">單字四測驗</a></li>
+        <li><a class="dropdown-item" href="v5t.html">單字五測驗</a></li>
+        </ul>
     </div>
 
     <div class="dropdown ms-auto" id="accountDropdown">
@@ -140,7 +140,38 @@
     let learnedCards = new Set(); // 用於儲存已學習的卡片索引
 
     const vocab = [
-      { word: "감사합니다", roman: "gamsahamnida", meaning: "謝謝" },
+      { word: "사거리", roman: "sageori", meaning: "十字路口" },
+      { word: "횡단보도", roman: "hoengdanbodo", meaning: "斑馬線" },
+      { word: "육교", roman: "yukgyo", meaning: "天橋" },
+      { word: "지하도", roman: "jihado", meaning: "地下道" },
+      { word: "강아지/개", roman: "gangaji/gae", meaning: "幼犬/成犬" },
+      { word: "고양이", roman: "goyang-i", meaning: "貓" },
+      { word: "새", roman: "sae", meaning: "鳥" },
+      { word: "소", roman: "so", meaning: "牛" },
+      { word: "오리", roman: "ori", meaning: "鴨子" },
+      { word: "닭", roman: "dak", meaning: "雞" },
+      { word: "돼지", roman: "dwaeji", meaning: "豬" },
+      { word: "호랑이", roman: "horang-i", meaning: "老虎" },
+      { word: "기린", roman: "girin", meaning: "長頸鹿" },
+      { word: "사자", roman: "saja", meaning: "獅子" },
+      { word: "원숭이", roman: "wonsung-i", meaning: "猴子" },
+      { word: "하마", roman: "hama", meaning: "河馬" },
+      { word: "곰", roman: "gom", meaning: "熊" },
+      { word: "펭귄", roman: "penggwin", meaning: "企鵝" },
+      { word: "토끼", roman: "tokki", meaning: "兔子" },
+      { word: "쥐", roman: "jwi", meaning: "老鼠" },
+      { word: "앞", roman: "ap", meaning: "前面" },
+      { word: "뒤", roman: "dwi", meaning: "後面" },
+      { word: "위", roman: "wi", meaning: "上面" },
+      { word: "아래/밑", roman: "arae/mit", meaning: "下面" },
+      { word: "옆", roman: "yeop", meaning: "旁邊" },
+      { word: "밖", roman: "bak", meaning: "外面" },
+      { word: "안/속", roman: "an/sok", meaning: "裡面" },
+      { word: "왼쪽", roman: "wenjjok", meaning: "左邊" },
+      { word: "오른쪽", roman: "oreunjjok", meaning: "右邊" },
+      { word: "건너편/맞은편", roman: "geonneopyeon/majeunpyeon", meaning: "對面" },
+      { word: "사이", roman: "sai", meaning: "之間" },
+      { word: "가운데", roman: "gaunde", meaning: "正中間" },
       // 之後可加入更多單字
     ];
     const TOTAL_CARDS = vocab.length; // 總字卡數

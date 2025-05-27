@@ -87,12 +87,12 @@
         單字測驗
       </a>
       <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="#">單元一測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元二測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元三測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元四測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元五測驗</a></li>
-      </ul>
+        <li><a class="dropdown-item" href="v1t.html">單字一測驗</a></li>
+        <li><a class="dropdown-item" href="v2t.html">單字二測驗</a></li>
+        <li><a class="dropdown-item" href="v3t.html">單字三測驗</a></li>
+        <li><a class="dropdown-item" href="v4t.html">單字四測驗</a></li>
+        <li><a class="dropdown-item" href="v5t.html">單字五測驗</a></li>
+        </ul>
     </div>
 
     <div class="dropdown ms-auto" id="accountDropdown">
@@ -140,12 +140,46 @@
     let learnedCards = new Set(); // 用於儲存已學習的卡片索引
 
     const vocab = [
-      { word: "안녕", roman: "annyeong", meaning: "你好" },
-      { word: "감사합니다", roman: "gamsahamnida", meaning: "謝謝" },
-      { word: "죄송합니다", roman: "joesonghamnida", meaning: "對不起" },
-      { word: "네", roman: "ne", meaning: "是" },
-      { word: "아니요", roman: "aniyo", meaning: "不是" },
-      { word: "사랑해요", roman: "saranghaeyo", meaning: "我愛你" }
+      { word: "안녕하세요", roman: "annyeonghaseyo", meaning: "您好" },
+      { word: "만나서 반가워요", roman: "mannaseo bangawoyo", meaning: "很高興認識您" },
+      { word: "잘 부탁드려요", roman: "jal butakdeuryeoyo", meaning: "請多多指教" },
+      { word: "안녕히 가세요", roman: "annyeonghi gaseyo", meaning: "請慢走" },
+      { word: "안녕히 계세요", roman: "annyeonghi gyeseyo", meaning: "請留步" },
+      { word: "감사합니다", roman: "gamsahamnida", meaning: "謝謝（偏正式）" },
+      { word: "고마워요", roman: "gomawoyo", meaning: "謝謝（偏口語）" },
+      { word: "잘 자요", roman: "jal jayo", meaning: "晚安" },
+      { word: "안녕히 주무세요", roman: "annyeonghi jumuseyo", meaning: "晚安（對長輩）" },
+      { word: "가수", roman: "gasu", meaning: "歌手" },
+      { word: "간호사", roman: "ganhosa", meaning: "護理人員" },
+      { word: "경찰", roman: "gyeongchal", meaning: "警察" },
+      { word: "군인", roman: "gunin", meaning: "軍人" },
+      { word: "운전기사", roman: "unjeongisa", meaning: "司機" },
+      { word: "기자", roman: "gija", meaning: "記者" },
+      { word: "모델", roman: "model", meaning: "模特" },
+      { word: "변호사", roman: "byeonhosa", meaning: "律師" },
+      { word: "학생", roman: "haksaeng", meaning: "學生" },
+      { word: "배우", roman: "baeu", meaning: "演員" },
+      { word: "운동선수", roman: "undongseonsu", meaning: "運動選手" },
+      { word: "회사원", roman: "hoesawon", meaning: "上班族" },
+      { word: "요리사", roman: "yorisa", meaning: "廚師" },
+      { word: "은행원", roman: "eunhaengwon", meaning: "銀行員" },
+      { word: "사진작가", roman: "sajinjjakga", meaning: "攝影師" },
+      { word: "주부", roman: "jubu", meaning: "家庭主婦" },
+      { word: "집", roman: "jip", meaning: "家" },
+      { word: "방", roman: "bang", meaning: "房間" },
+      { word: "시장", roman: "sijang", meaning: "市場" },
+      { word: "식당", roman: "sikdang", meaning: "餐廳" },
+      { word: "카페/커피숍", roman: "kape/keopisyop", meaning: "咖啡廳" },
+      { word: "슈퍼마켓", roman: "syupeomaket", meaning: "超級市場" },
+      { word: "노래방", roman: "noraebang", meaning: "KTV" },
+      { word: "은행", roman: "eunhaeng", meaning: "銀行" },
+      { word: "경찰서", roman: "gyeongchalseo", meaning: "警察局" },
+      { word: "우체국", roman: "ucheguk", meaning: "郵局" },
+      { word: "세탁소", roman: "setakso", meaning: "洗衣店" },
+      { word: "공원", roman: "gongwon", meaning: "公園" },
+      { word: "회사", roman: "hoesa", meaning: "公司" },
+      { word: "사무실", roman: "samusil", meaning: "辦公室" },
+      { word: "교실", roman: "gyosil", meaning: "教室" },
       // 之後可加入更多單字
     ];
     const TOTAL_CARDS = vocab.length; // 總字卡數

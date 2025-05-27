@@ -87,12 +87,12 @@
         單字測驗
       </a>
       <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="#">單元一測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元二測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元三測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元四測驗</a></li>
-        <li><a class="dropdown-item" href="#">單元五測驗</a></li>
-      </ul>
+        <li><a class="dropdown-item" href="v1t.html">單字一測驗</a></li>
+        <li><a class="dropdown-item" href="v2t.html">單字二測驗</a></li>
+        <li><a class="dropdown-item" href="v3t.html">單字三測驗</a></li>
+        <li><a class="dropdown-item" href="v4t.html">單字四測驗</a></li>
+        <li><a class="dropdown-item" href="v5t.html">單字五測驗</a></li>
+        </ul>
     </div>
 
     <div class="dropdown ms-auto" id="accountDropdown">
@@ -140,7 +140,46 @@
     let learnedCards = new Set(); // 用於儲存已學習的卡片索引
 
     const vocab = [
-      { word: "안녕", roman: "annyeong", meaning: "你好" },
+      { word: "약국", roman: "yakguk", meaning: "藥局" },
+      { word: "병원", roman: "byeongwon", meaning: "醫院" },
+      { word: "미용실", roman: "miyongsil", meaning: "美髮院" },
+      { word: "부동산", roman: "budongsan", meaning: "房仲" },
+      { word: "기숙사", roman: "gisuksa", meaning: "宿舍" },
+      { word: "도서관", roman: "doseogwan", meaning: "圖書館" },
+      { word: "서점", roman: "seojeom", meaning: "書局" },
+      { word: "학교", roman: "hakgyo", meaning: "學校" },
+      { word: "호텔", roman: "hotel", meaning: "飯店" },
+      { word: "미술관", roman: "misulgwan", meaning: "美術館" },
+      { word: "박물관", roman: "bangmulgwan", meaning: "博物館" },
+      { word: "영화관", roman: "yeonghwagwan", meaning: "電影院" },
+      { word: "백화점", roman: "baekhwajeom", meaning: "百貨公司" },
+      { word: "대사관", roman: "daesagwan", meaning: "大使館" },
+      { word: "가방", roman: "gabang", meaning: "包包" },
+      { word: "지갑", roman: "jigap", meaning: "錢包" },
+      { word: "돈", roman: "don", meaning: "錢" },
+      { word: "카메라", roman: "kamera", meaning: "相機" },
+      { word: "핸드폰", roman: "haendeupon", meaning: "手機" },
+      { word: "컴퓨터", roman: "keompyuteo", meaning: "電腦" },
+      { word: "사전", roman: "sajeon", meaning: "字典" },
+      { word: "책", roman: "chaek", meaning: "書" },
+      { word: "공책", roman: "gongchaek", meaning: "筆記本" },
+      { word: "잡지", roman: "japji", meaning: "雜誌" },
+      { word: "소설책", roman: "soseolchaek", meaning: "小說" },
+      { word: "만화책", roman: "manhwachaek", meaning: "漫畫" },
+      { word: "신문", roman: "sinmun", meaning: "報紙" },
+      { word: "가위", roman: "gawi", meaning: "剪刀" },
+      { word: "연필", roman: "yeonpil", meaning: "鉛筆" },
+      { word: "볼펜", roman: "bolpen", meaning: "原子筆" },
+      { word: "지우개", roman: "jiugae", meaning: "橡皮擦" },
+      { word: "수정 테이프", roman: "sujeong teipeu", meaning: "立可帶" },
+      { word: "필통", roman: "piltong", meaning: "鉛筆盒" },
+      { word: "책상", roman: "chaeksang", meaning: "書桌" },
+      { word: "칠판", roman: "chilpan", meaning: "黑板" },
+      { word: "열쇠", roman: "yeolsoe", meaning: "鑰匙" },
+      { word: "안경", roman: "angyeong", meaning: "眼鏡" },
+      { word: "시계", roman: "sigye", meaning: "時鐘" },
+      { word: "지도", roman: "jido", meaning: "地圖" },
+      { word: "텔레비전", roman: "tellebijeon", meaning: "電視" },
       // 之後可加入更多單字
     ];
     const TOTAL_CARDS = vocab.length; // 總字卡數
