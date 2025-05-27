@@ -46,6 +46,12 @@
       border-radius: 5px;
       transition: width 0.5s ease-in-out;
     }
+    #questionDisplay {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #343a40;
+    }
   </style>
 </head>
 <body class="bg-light">
@@ -81,18 +87,17 @@
   </nav>
 
   <div class="container text-center mt-5">
-    <div class="quiz-box bg-white p-4 rounded shadow-sm">
-      <h2 class="mb-4">單字一測驗</h2>
-      <div id="quizContainer">
-        <h4 id="questionDisplay"></h4>
-        <div id="optionsBox" class="d-flex flex-wrap justify-content-center">
-          </div>
-        <p id="feedback" class="feedback text-danger"></p>
-        <div id="progress-bar-container">
-          <div id="progress-bar"></div>
+    <h2 class="mb-4">單字一測驗</h2>
+
+    <div class="quiz-box shadow">
+      <h4 id="questionDisplay"></h4>
+      <div id="optionsBox" class="d-flex flex-wrap justify-content-center">
         </div>
-        <p class="mt-2 text-muted" id="questionCounter">題號：0 / 0</p>
+      <p id="feedback" class="feedback text-danger"></p>
+      <div id="progress-bar-container">
+        <div id="progress-bar"></div>
       </div>
+      <p class="mt-2 text-muted" id="questionCounter">題號：0 / 0</p>
     </div>
   </div>
 
