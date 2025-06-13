@@ -15,6 +15,24 @@
       font-size: 1rem;
       font-weight: bold;
     }
+    #progressList .list-group-item a {
+      transition: transform 0.2s ease-in-out, font-weight 0.2s ease-in-out; /* 添加過渡效果，讓變化更平滑 */
+      display: inline-block; /* 確保 transform 能作用 */
+    }
+
+    #progressList .list-group-item a:hover {
+      transform: scale(1.05); /* 放大 5% */
+      font-weight: bold;      /* 字體變粗 */
+    }
+    #quizBadgeGrid .card-title a {
+      transition: transform 0.2s ease-in-out, font-weight 0.2s ease-in-out;
+      display: inline-block; /* 確保 transform 能作用 */
+    }
+
+    #quizBadgeGrid .card-title a:hover {
+      transform: scale(1.05); /* 放大 5% */
+      font-weight: bolder;    /* 字體變更粗，或使用 bold */
+    }
   </style>
 </head>
 <body class="bg-light">
@@ -53,13 +71,13 @@
       </div>
     
     <div class="section-title">
-      <h4>📘 學習進度</h4>
+      <h4>📘 學習進度(可點選單元名稱跳轉至該頁面)</h4>
       <ul class="list-group" id="progressList">
         </ul>
     </div>
 
     <div class="section-title">
-      <h4>🏆 測驗進度</h4>
+      <h4>🏆 測驗進度(可點選測驗名稱跳轉至該頁面)</h4>
       <div class="row g-3" id="quizBadgeGrid">
         </div>
     </div>
@@ -108,7 +126,7 @@
           };
 
           const unitPageMap = {
-            "立即學習": "dm.html",
+            "單母音": "dm.html",
             "複合母音": "fm.html",
             "單子音": "dz.html", // Assuming 'sy_sc.html' for 單子音
             "複合子音": "fz.html", // Assuming 'sy_fc.html' for 複合子音
@@ -118,6 +136,19 @@
             "單字四": "voc4.html",
             "單字五": "voc5.html"
             // Add more mappings as needed for other units
+          };
+
+          const quizPageMap = {
+            "單母音": "dmt.html", // 假設單母音測驗頁面是 quiz_dm.html
+            "複合母音": "fmt.html", // 假設複合母音測驗頁面是 quiz_fm.html
+            "單子音": "dzt.html",   // 假設單子音測驗頁面是 quiz_dz.html
+            "複合子音": "fzt.html",   // 假設複合子音測驗頁面是 quiz_fz.html
+            "單字一": "v1t.html",
+            "單字二": "v2t.html",
+            "單字三": "v3t.html",
+            "單字四": "v4t.html",
+            "單字五": "v5t.html"
+            // 根據你的實際測驗頁面檔案名稱來添加更多映射
           };
 
           learningUnits.forEach(unit => {
@@ -138,8 +169,9 @@
             const li = document.createElement("li");
             li.className = "list-group-item d-flex justify-content-between align-items-center";
             li.innerHTML = `
-              ${unit}
+              
               <a href="${unitPage}" class="text-decoration-none text-body">
+                ${unit}
               </a>
               <span class="badge bg-${status === '完成學習' ? 'success' : (status === '未完成學習' ? 'warning text-dark' : 'secondary')} badge-status">
                 ${status}
@@ -172,12 +204,15 @@
               icon = "❌";
             }
             
+            const quizPage = quizPageMap[unit] || '#'; 
             const col = document.createElement("div");
             col.className = "col-md-4 col-sm-6";
             col.innerHTML = `
               <div class="card text-center border-${badgeColor}">
                 <div class="card-body">
-                  <h6 class="card-title">${unit}</h6>
+                  <h6 class="card-title"><a href="${quizPage}" class="text-decoration-none text-body">
+                      ${unit}
+                    </a></h6>
                   <p class="card-text card-text-quiz">
                     ${icon} ${quizStatus}
                   </p>
