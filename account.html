@@ -33,6 +33,20 @@
       transform: scale(1.05); /* 放大 5% */
       font-weight: bolder;    /* 字體變更粗，或使用 bold */
     }
+    /* 用戶名更新提示訊息的樣式 */
+    #updateMessage {
+      margin-top: 10px;
+      padding: 8px 15px;
+      border-radius: 5px;
+      display: none; /* 預設隱藏 */
+      opacity: 0;
+      transition: opacity 0.5s ease-out; /* 讓顯示和隱藏有淡入淡出效果 */
+    }
+    #updateMessage.show {
+      display: block; /* 當有 'show' 類別時顯示 */
+      opacity: 1;
+    }
+    
   </style>
 </head>
 <body class="bg-light">
@@ -66,9 +80,10 @@
         <span id="currentDisplayName">載入中...</span>
       </div>
       <div class="input-group mb-3">
-        <input type="text" class="form-control" id="newDisplayNameInput" placeholder="輸入新用戶名">
-        <button class="btn btn-primary" id="updateDisplayNameBtn">更新用戶名</button>
-      </div>
+              <input type="text" class="form-control" placeholder="輸入新用戶名" id="newDisplayNameInput">
+              <button class="btn btn-primary" type="button" id="updateDisplayNameBtn">更新用戶名</button>
+            </div>
+            <div id="updateMessage" class="alert d-none" role="alert"></div>
     
     <div class="section-title">
       <h4>📘 學習進度(可點選單元名稱跳轉至該頁面)</h4>
@@ -97,11 +112,26 @@
       const updateDisplayNameBtn = document.getElementById("updateDisplayNameBtn"); // 獲取更新按鈕
       const progressList = document.getElementById("progressList");
       const quizBadgeGrid = document.getElementById("quizBadgeGrid");
+      const updateMessage = document.getElementById('updateMessage'); // 新增的提示訊息元素
 
       // 定義所有學習單元和測驗單元，用於遍歷和顯示
       const learningUnits = ["單母音", "複合母音", "單子音", "複合子音", "單字一", "單字二", "單字三", "單字四", "單字五"]; // 字卡學習單元
       const quizUnits = ["單母音", "複合母音", "單子音", "複合子音", "單字一", "單字二", "單字三", "單字四", "單字五"]; // 測驗單元
 
+      // 顯示提示訊息的函數
+      function showUpdateMessage(message, type) {
+        updateMessage.textContent = message; // 設定訊息文字
+        updateMessage.className = `alert mt-2 alert-${type} show`; // 設置 Bootstrap 樣式並顯示
+
+        // 設置定時器，在 3 秒後隱藏訊息
+        setTimeout(() => {
+          updateMessage.classList.remove('show'); // 移除 show 類別，開始淡出
+          // 等待過渡動畫完成後再完全隱藏 (使用 d-none)
+          setTimeout(() => {
+              updateMessage.classList.add('d-none');
+          }, 500); // 這裡的時間應與 CSS 的 transition 時間匹配或稍長
+        }, 3000);
+      }
       observeUser(async (user) => {
         if (user) {
           userEmailSpan.textContent = user.email;
@@ -231,22 +261,24 @@
               try {
                 await updateDisplayName(user.uid, newName); // 調用更新用戶名的函數
                 currentDisplayNameSpan.textContent = newName; // 立即更新 UI
-                alert("用戶名更新成功！");
+                showUpdateMessage("用戶名更新成功！", "success"); // <-- 使用新函數
                 newDisplayNameInput.value = ''; // 清空輸入框
               } catch (error) {
                 console.error("更新用戶名失敗:", error);
-                alert("更新用戶名失敗，請重試。");
+                showUpdateMessage("更新用戶名失敗，請重試。", "danger"); // <-- 使用新函數
               }
             } else {
-              alert("用戶名不能為空。");
+              showUpdateMessage("用戶名不能為空。", "warning"); // <-- 使用新函數
             }
           });
 
-        } else {
+        } else {  
           userEmailSpan.textContent = "尚未登入";
           currentDisplayNameSpan.textContent = "尚未登入"; // 登出時也更新
           progressList.innerHTML = '<li class="list-group-item text-muted">登入後可查看學習進度。</li>';
           quizBadgeGrid.innerHTML = '<div class="col-12 text-muted">登入後可查看測驗進度。</div>';
+          showUpdateMessage("", ""); // <-- 新增這行，清空提示訊息
+
         }
       }); // <-- 關閉 observeUser
     }); // <-- 關閉 DOMContentLoaded
