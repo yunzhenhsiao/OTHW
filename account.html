@@ -107,6 +107,19 @@
             "單字五": 32  // 根據 voc5.html 的 vocab.length 設置
           };
 
+          const unitPageMap = {
+            "單母音": "dm.html",
+            "複合母音": "fm.html",
+            "單子音": "dz.html", // Assuming 'sy_sc.html' for 單子音
+            "複合子音": "fz.html", // Assuming 'sy_fc.html' for 複合子音
+            "單字一": "voc1.html",
+            "單字二": "voc2.html",
+            "單字三": "voc3.html",
+            "單字四": "voc4.html",
+            "單字五": "voc5.html"
+            // Add more mappings as needed for other units
+          };
+
           learningUnits.forEach(unit => {
             const currentLearned = learnedCards[unit] ? new Set(learnedCards[unit]) : new Set();
             const total = totalCardsMap[unit];
@@ -119,6 +132,8 @@
             }
             // 如果後續還有舊的 'progress' 字段的邏輯，這裡可以做兼容性處理
             // if (quizProgress[unit] === '已完成') { status = '已完成'; } // 優先顯示測驗結果
+
+            const unitPage = unitPageMap[unit] || '#'; // 獲取對應的頁面網址，如果沒有找到則預設為 '#'
 
             const li = document.createElement("li");
             li.className = "list-group-item d-flex justify-content-between align-items-center";
