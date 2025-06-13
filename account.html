@@ -139,6 +139,9 @@
             li.className = "list-group-item d-flex justify-content-between align-items-center";
             li.innerHTML = `
               ${unit}
+              <a href="${unitPage}" class="text-decoration-none text-body">
+                ${unit}
+              </a>
               <span class="badge bg-${status === '完成學習' ? 'success' : (status === '未完成學習' ? 'warning text-dark' : 'secondary')} badge-status">
                 ${status}
               </span>
